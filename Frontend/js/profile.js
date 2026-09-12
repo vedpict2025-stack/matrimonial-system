@@ -27,7 +27,7 @@ async function loadProfileData() {
     }
 
     try {
-        const response = await fetch(`[https://matrimonial-api-0097.onrender.com/api/profiles/${profileId}`);
+        const response = await fetch(`https://matrimonial-api-0097.onrender.com/api/profiles/${profileId}`);
         
         if (!response.ok) throw new Error("Profile not found");
         
