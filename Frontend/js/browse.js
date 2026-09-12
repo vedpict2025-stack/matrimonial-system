@@ -22,7 +22,7 @@ let allProfiles = []; // Store database records here
 // 1. Fetch ALL profiles from the database
 async function loadAllProfiles() {
     try {
-        const response = await fetch("http://localhost:5000/api/profiles");
+        const response = await fetch("[https://matrimonial-api-0097.onrender.com/api/profiles");
         
         if (!response.ok) throw new Error("Failed to fetch profiles");
         

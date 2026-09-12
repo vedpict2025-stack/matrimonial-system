@@ -87,7 +87,7 @@ addProfileForm.addEventListener("submit", async function(event) {
 
     try {
         // Send data to your Node.js backend (which sends it to Supabase)
-        const response = await fetch("http://localhost:5000/api/profiles", {
+        const response = await fetch("[https://matrimonial-api-0097.onrender.com/api/profiles", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
