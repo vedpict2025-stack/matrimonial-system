@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Details | Matrimonial Committee</title>
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body style="background-color: #f4f6f9; margin: 0; font-family: sans-serif;">
+
+    <!-- Header -->
+    <header class="top-header" style="background-color: #900C3F; color: white; padding: 15px 0;">
+        <div class="header-container" style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px; align-items: center;">
+            <h1 style="margin: 0; font-size: 1.5rem;">Committee Matrimony</h1>
+            <nav>
+                <a href="add-profile.html" style="color: white; text-decoration: none; margin-left: 20px; opacity: 0.8;">Add Profile</a>
+                <a href="browse.html" style="color: white; text-decoration: none; margin-left: 20px; opacity: 0.8;">Browse Profiles</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="profile-container" style="max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <a href="browse.html" class="back-link" style="text-decoration: none; color: #900C3F; font-weight: bold;">← Back to Browse</a>
+        
+        <div id="loadingMessage" class="loading" style="text-align: center; padding: 20px;">Loading profile details...</div>
+        
+        <!-- Profile Content (Hidden until JS loads data) -->
+        <div id="profileContent" class="profile-content" style="display: none;">
+            
+            <!-- Top Section: Photo & Basic Details -->
+            <div class="profile-header-top" style="display: flex; gap: 20px; align-items: flex-start; margin-top: 20px; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+                
+                <!-- The SINGLE image tag with the correct ID -->
+                <img id="detailImage" src="../images/default-profile.jpg" alt="Profile Photo" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #900C3F;">
+                
+                <div class="header-text" style="flex: 1;">
+                    <span id="detailUniqueId" style="background: #eee; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9rem;"></span>
+                    <h2 id="detailName" style="margin: 10px 0 5px 0; font-size: 2rem; text-transform: capitalize;">Name</h2>
+                    <p id="detailBasic" style="color: #666; margin: 0 0 15px 0; font-size: 1.1rem;">Age • Gender • Location</p>
+                    <button class="primary-btn" style="padding: 10px 20px; background: #900C3F; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">Print Biodata</button>
+                </div>
+            </div>
+
+            <!-- Collapsible Sections -->
+            <div class="sections-container">
+                
+                <!-- 1. Personal Information -->
+                <button class="accordion active" style="width: 100%; text-align: left; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 5px;">Personal Information ▼</button>
+                <div class="panel" style="padding: 15px; border: 1px solid #ddd; border-top: none; margin-bottom: 15px; max-height: 500px;">
+                    <div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <p style="margin: 5px 0;"><strong>Age:</strong> <span id="infoAge">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Gender:</strong> <span id="infoGender">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Height:</strong> <span id="infoHeight">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Weight:</strong> <span id="infoWeight">-</span></p>
+                        <p style="margin: 5px 0;"><strong>City:</strong> <span id="infoCity">-</span></p>
+                        <p style="margin: 5px 0;"><strong>State:</strong> <span id="infoState">-</span></p>
+                    </div>
+                </div>
+
+                <!-- 2. Religion & Community -->
+                <button class="accordion" style="width: 100%; text-align: left; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 5px;">Religion & Community ▼</button>
+                <div class="panel" style="padding: 15px; border: 1px solid #ddd; border-top: none; margin-bottom: 15px;">
+                    <div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <p style="margin: 5px 0;"><strong>Religion:</strong> <span id="infoReligion">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Community:</strong> <span id="infoCommunity">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Caste:</strong> <span id="infoCaste">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Sub-religion:</strong> <span id="infoSubReligion">-</span></p>
+                    </div>
+                </div>
+
+                <!-- 3. Education & Career -->
+                <button class="accordion" style="width: 100%; text-align: left; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 5px;">Education & Career ▼</button>
+                <div class="panel" style="padding: 15px; border: 1px solid #ddd; border-top: none; margin-bottom: 15px;">
+                    <div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <p style="margin: 5px 0;"><strong>Education:</strong> <span id="infoEducation">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Occupation:</strong> <span id="infoOccupation">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Income:</strong> <span id="infoIncome">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Future Plans:</strong> <span id="infoFuturePlans">-</span></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/profile.js"></script>
+</body>
+</html>

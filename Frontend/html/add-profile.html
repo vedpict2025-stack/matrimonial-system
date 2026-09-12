@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Profile | Matrimonial Committee</title>
+    <link rel="stylesheet" href="../css/add-profile.css">
+</head>
+<body>
+
+    <header class="top-header">
+        <div class="header-container">
+            <h1>Committee Matrimony</h1>
+            <nav>
+                <a href="#" class="active">Add Profile</a>
+                <a href="browse.html">Browse Profiles</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="form-container">
+        <div class="form-header">
+            <h2>Register New Profile</h2>
+            <p>Fill out the biodata sections below. A Unique ID will be generated automatically.</p>
+        </div>
+
+        <form id="addProfileForm">
+            
+            <!-- Add this inside your form, perhaps right above the Personal Information section -->
+<div class="form-group" style="margin-bottom: 20px;">
+    <label for="profilePhoto" style="font-weight: bold; display: block; margin-bottom: 5px;">Upload Profile Photo *</label>
+    <input type="file" id="profilePhoto" accept="image/png, image/jpeg, image/jpg" style="padding: 10px; border: 1px solid #ccc; width: 100%; box-sizing: border-box;">
+    
+    <!-- A small preview box to show the image before saving -->
+    <img id="photoPreview" src="../images/default-profile.jpg" style="width: 150px; height: 150px; object-fit: cover; margin-top: 10px; border-radius: 8px; border: 2px solid #ddd; display: none;">
+</div>
+
+            <button type="button" class="accordion active">Personal Information ▼</button>
+            <div class="panel" style="max-height: 1000px;">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="name" required placeholder="E.g. Rahul Sharma">
+                    </div>
+                    <div class="input-group">
+                        <label>Age *</label>
+                        <input type="number" id="age" required placeholder="E.g. 27">
+                    </div>
+                    <div class="input-group">
+                        <label>Gender *</label>
+                        <select id="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                    <div class="input-group">
+                        <label>Height</label>
+                        <input type="text" id="height" placeholder="E.g. 5'10&quot;">
+                    </div>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="weight" placeholder="E.g. 70">
+                    </div>
+                    <div class="input-group">
+                        <label>City *</label>
+                        <input type="text" id="city" required placeholder="E.g. Pune">
+                    </div>
+                    <div class="input-group">
+                        <label>State *</label>
+                        <select id="state" required>
+                            <option value="">Select State</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="accordion">Religion & Community ▼</button>
+            <div class="panel">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Religion</label>
+                        <select id="religion">
+                            <option value="">Select Religion</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Muslim">Muslim</option>
+                            <option value="Christian">Christian</option>
+                            <option value="Sikh">Sikh</option>
+                            <option value="Jain">Jain</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Sub-religion</label>
+                        <input type="text" id="sub_religion" placeholder="E.g. Vaishnav">
+                    </div>
+                    <div class="input-group">
+                        <label>Community</label>
+                        <input type="text" id="community" placeholder="E.g. Brahmin, Maratha">
+                    </div>
+                    <div class="input-group">
+                        <label>Caste</label>
+                        <input type="text" id="caste" placeholder="E.g. Deshastha">
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="accordion">Education & Career ▼</button>
+            <div class="panel">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Education/Qualification</label>
+                        <input type="text" id="education" placeholder="E.g. B.E. Computer Engineering">
+                    </div>
+                    <div class="input-group">
+                        <label>Occupation/Job</label>
+                        <input type="text" id="occupation" placeholder="E.g. Software Engineer">
+                    </div>
+                    <div class="input-group">
+                        <label>Annual Income</label>
+                        <input type="text" id="income" placeholder="E.g. ₹8 LPA">
+                    </div>
+                    <div class="input-group">
+                        <label>Future Plans</label>
+                        <input type="text" id="future_plans" placeholder="E.g. Planning to move abroad">
+                    </div>
+                </div>
+            </div>
+
+            <div id="submitMessage" class="message-box" style="display: none;"></div>
+            
+            <div class="form-actions">
+                <button type="submit" class="primary-btn" id="submitBtn">Save Profile to Database</button>
+            </div>
+
+        </form>
+    </main>
+
+    <script src="../js/add-profile.js"></script>
+</body>
+</html>

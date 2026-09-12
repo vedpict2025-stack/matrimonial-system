@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Profiles | Matrimonial Committee</title>
+    <link rel="stylesheet" href="../css/browse.css">
+</head>
+<body>
+
+    <!-- Simple Header -->
+    <header class="top-header">
+        <div class="header-container">
+            <h1>Committee Matrimony</h1>
+            <nav>
+                <a href="#">Add Profile</a>
+                <a href="#" class="active">Browse Profiles</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="browse-container">
+        
+        <!-- LEFT SIDEBAR: FILTERS -->
+        <aside class="filters-sidebar">
+            <div class="filter-header">
+                <h2>Search & Filter</h2>
+            </div>
+            
+            <div class="filter-group">
+                <label for="searchInput">Search Name or City</label>
+                <input type="text" id="searchInput" placeholder="E.g. Rahul, Pune">
+            </div>
+
+            <div class="filter-group">
+                <label for="genderFilter">Gender</label>
+                <select id="genderFilter">
+                    <option value="">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Age Range</label>
+                <div class="age-inputs">
+                    <input type="number" id="minAgeFilter" placeholder="Min" min="18">
+                    <span>-</span>
+                    <input type="number" id="maxAgeFilter" placeholder="Max" min="18">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="religionFilter">Religion</label>
+                <select id="religionFilter">
+                    <option value="">All Religions</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Muslim">Muslim</option>
+                    <option value="Christian">Christian</option>
+                    <option value="Sikh">Sikh</option>
+                    <option value="Jain">Jain</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="stateFilter">State</label>
+                <select id="stateFilter">
+                    <option value="">All States</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Karnataka">Karnataka</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button id="applyFilters" class="primary-btn">Apply Filters</button>
+                <button id="clearFilters" class="secondary-btn">Clear All</button>
+            </div>
+        </aside>
+
+        <!-- RIGHT AREA: PROFILES GRID -->
+        <section class="profiles-section">
+            <div class="section-header">
+                <h2>Browse Profiles</h2>
+                <span id="profileCount" class="badge">0 Profiles</span>
+            </div>
+
+            <!-- Warning if no profiles match filters -->
+            <div id="noResults" class="no-results" style="display: none;">
+                <h3>No profiles found</h3>
+                <p>Try adjusting your search or clearing the filters.</p>
+            </div>
+
+            <!-- The Grid where JS injects cards -->
+            <div id="profilesContainer" class="profiles-grid">
+                <!-- Profile cards load here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Link your JS at the bottom so the HTML loads first -->
+    <script src="../js/browse.js"></script>
+</body>
+</html> 
