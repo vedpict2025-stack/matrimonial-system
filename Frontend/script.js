@@ -173,7 +173,7 @@ if (form) {
         submitText.textContent = "Saving Securely...";
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/api/profiles", {
+            const response = await fetch("http://https://matrimonial-api-0097.onrender.com](https://matrimonial-api-0097.onrender.com:5000/api/profiles", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(profile)
@@ -268,7 +268,7 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
     btn.disabled = true;
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/api/login', {
+        const res = await fetch('http://https://matrimonial-api-0097.onrender.com](https://matrimonial-api-0097.onrender.com:5000/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, pin })
@@ -326,7 +326,7 @@ async function fetchAndRenderProfiles(reset = false) {
     isFetching = true;
     
     try {
-        const res = await fetch(`http://127.0.0.1:5000/api/profiles?page=${currentPage}&limit=12`);
+        const res = await fetch(`http://https://matrimonial-api-0097.onrender.com](https://matrimonial-api-0097.onrender.com:5000/api/profiles?page=${currentPage}&limit=12`);
         let profiles = await res.json();
         
         if (profiles.length < 12) hasMoreProfiles = false; // Reached the end of DB
@@ -400,7 +400,7 @@ async function syncDashboard() {
     document.getElementById('dashName').textContent = "Loading...";
 
     try {
-        const res = await fetch(`http://127.0.0.1:5000/api/profiles/${savedId}`);
+        const res = await fetch(`http://https://matrimonial-api-0097.onrender.com](https://matrimonial-api-0097.onrender.com:5000/api/profiles/${savedId}`);
         if (res.ok) {
             const data = await res.json();
             document.getElementById('dashName').textContent = data.name || "Anonymous User";
