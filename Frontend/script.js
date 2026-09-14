@@ -103,29 +103,31 @@ function generateReviewSummary() {
     const reviewContent = document.getElementById('reviewContent');
     if (!reviewContent) return;
     
-    // Key-Value map of input IDs to readable labels
+    // Key-Value map of input IDs, readable labels, and their parent sections
     const fieldsToReview = [
-        { id: 'name', label: 'Full Name' },
-        { id: 'dob', label: 'Date of Birth' },
-        { id: 'gender', label: 'Gender' },
-        { id: 'city', label: 'City' },
-        { id: 'state', label: 'State' },
-        { id: 'height', label: 'Height' },
-        { id: 'qualification', label: 'Qualification' },
-        { id: 'job', label: 'Profession' },
-        { id: 'income', label: 'Annual Income' },
-        { id: 'religion', label: 'Religion' },
-        { id: 'caste', label: 'Caste' },
-        { id: 'phone', label: 'Mobile Number' },
-        { id: 'email', label: 'Email' }
+        { id: 'name', label: 'Full Name', section: 'sec-personal' },
+        { id: 'dob', label: 'Date of Birth', section: 'sec-personal' },
+        { id: 'gender', label: 'Gender', section: 'sec-personal' },
+        { id: 'city', label: 'City', section: 'sec-personal' },
+        { id: 'state', label: 'State', section: 'sec-personal' },
+        { id: 'height', label: 'Height', section: 'sec-personal' },
+        { id: 'qualification', label: 'Qualification', section: 'sec-education' },
+        { id: 'job', label: 'Profession', section: 'sec-education' },
+        { id: 'income', label: 'Annual Income', section: 'sec-education' },
+        { id: 'religion', label: 'Religion', section: 'sec-religion' },
+        { id: 'caste', label: 'Caste', section: 'sec-religion' },
+        { id: 'phone', label: 'Mobile Number', section: 'sec-contact' },
+        { id: 'email', label: 'Email', section: 'sec-contact' }
     ];
 
     let html = '';
     fieldsToReview.forEach(field => {
         const inputElement = document.getElementById(field.id);
+        
+        // If empty, create a clickable routing link instead of plain text
         const value = (inputElement && inputElement.value.trim() !== "") 
             ? inputElement.value 
-            : '<span style="color:var(--pink); font-size:0.85em;">Not Provided</span>';
+            : `<span style="color:var(--pink); font-size:0.9em; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="switchFormSection('${field.section}')">Add ${field.label} ✎</span>`;
         
         html += `
             <div class="review-item">
@@ -569,4 +571,51 @@ const profileFormElement = document.getElementById('profileForm');
 if (profileFormElement) {
     profileFormElement.addEventListener('input', updateSectionProgress);
     profileFormElement.addEventListener('change', updateSectionProgress);
+}
+
+/* =========================================
+   AUTO-FILL STATE BASED ON CITY
+========================================= */
+const cityInput = document.getElementById('city');
+const stateSelect = document.getElementById('state');
+
+// Dictionary of common cities and their exact state dropdown values
+const cityStateMap = {
+    "sangli": "Maharashtra",
+    "pune": "Maharashtra",
+    "mumbai": "Maharashtra",
+    "nagpur": "Maharashtra",
+    "nashik": "Maharashtra",
+    "kolhapur": "Maharashtra",
+    "bengaluru": "Karnataka",
+    "bangalore": "Karnataka",
+    "mysuru": "Karnataka",
+    "ahmedabad": "Gujarat",
+    "surat": "Gujarat",
+    "vadodara": "Gujarat",
+    "hyderabad": "Telangana",
+    "jaipur": "Rajasthan",
+    "lucknow": "Uttar Pradesh",
+    "chennai": "Tamil Nadu",
+    "delhi": "Delhi",
+    "new delhi": "Delhi",
+    "indore": "Madhya Pradesh",
+    "bhopal": "Madhya Pradesh"
+};
+
+if (cityInput && stateSelect) {
+    cityInput.addEventListener('input', function() {
+        // Convert typed text to lowercase and remove extra spaces
+        const typedCity = this.value.trim().toLowerCase();
+        
+        // If the typed city exists in our map, auto-select the state
+        if (cityStateMap[typedCity]) {
+            stateSelect.value = cityStateMap[typedCity];
+            
+            // Force the progress checker to run so the pink checkmark updates instantly
+            if (typeof updateSectionProgress === 'function') {
+                updateSectionProgress();
+            }
+        }
+    });
 }
