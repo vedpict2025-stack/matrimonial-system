@@ -3,526 +3,514 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrimonial Committee | Profile Registration</title>
+    <title>Matrimonial Committee | Trusted Family Matches</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 <div class="app-shell">
 
-    <!-- TOP NAVIGATION (Hidden initially) -->
     <nav class="top-nav" id="mainNavigation" style="display: none;">
         <div class="nav-brand">
-            <span class="nav-logo">💍</span>
-            <span>Matrimonial Committee</span>
+            <span class="nav-logo" aria-hidden="true">
+                <svg viewBox="0 0 40 40" width="22" height="22" fill="none">
+                    <path d="M20 6c1.8 4.2 4.8 7.2 9 9-4.2 1.8-7.2 4.8-9 9-1.8-4.2-4.8-7.2-9-9 4.2-1.8 7.2-4.8 9-9Z" fill="currentColor"/>
+                    <circle cx="20" cy="20" r="3.2" fill="currentColor" opacity=".55"/>
+                </svg>
+            </span>
+            <span class="nav-brand-text">
+                <span>Matrimonial Committee</span>
+                <small>Guided matches for families</small>
+            </span>
         </div>
-        
-        <div class="nav-links">
+
+        <button type="button" class="nav-menu-btn" id="navMenuBtn" aria-label="Toggle navigation">Menu</button>
+
+        <div class="nav-links" id="navLinks">
             <button type="button" class="nav-link active" id="navRegister" data-page="registerPage">Register</button>
             <button type="button" class="nav-link auth-only" data-page="browsePage" style="display: none;">Browse Profiles</button>
             <button type="button" class="nav-link auth-only" data-page="dashboardPage" style="display: none;">My Dashboard</button>
             <button type="button" class="nav-link auth-only" data-page="adminPage" style="display: none;">Committee</button>
-            <button type="button" id="btnLogOut" class="nav-link auth-only" style="display: none; background: var(--pink); color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(255, 75, 125, 0.3);">Log Out</button>
+            <button type="button" id="btnLogOut" class="nav-link auth-only nav-logout" style="display: none;">Log Out</button>
         </div>
     </nav>
 
 
     <!-- ================= AUTH / LANDING PAGE ================= -->
     <main id="authPage" class="page active-page auth-layout">
+        <section class="auth-hero">
+            <p class="brand-kicker">A trusted committee</p>
+            <h1>Find a match with dignity, family, and care.</h1>
+            <p class="auth-lead">A warm, committee-guided space for Indian families to register profiles and discover compatible matches — privately, respectfully, and without the noise of a dating app.</p>
+            <ul class="auth-trust">
+                <li>Committee-led introductions</li>
+                <li>Contact details stay private</li>
+                <li>Profiles made for families</li>
+            </ul>
+        </section>
+
         <div class="auth-card">
-            <div class="logo-icon" style="font-size: 65px; margin-bottom: 10px;">💍</div>
-            <h1 style="font-size: 2.2rem; color: var(--purple-dark); margin-bottom: 10px; font-weight: 700;">Welcome</h1>
-            <p style="color: var(--muted); margin-bottom: 35px; font-size: 15px;">Join our trusted matrimonial community to find your perfect match.</p>
-            
-            <div id="authButtons" style="display: flex; flex-direction: column; gap: 15px;">
-                <button type="button" id="btnCreateAccount" class="primary-btn" style="height: 55px; font-size: 1.1rem; width: 100%;">Create a New Account</button>
-                <button type="button" id="btnShowLogin" class="secondary-btn" style="height: 55px; font-size: 1.1rem; width: 100%;">Log In</button>
+            <div class="logo-icon" aria-hidden="true">
+                <svg viewBox="0 0 40 40" width="42" height="42" fill="none">
+                    <path d="M20 5c2 4.6 5.4 8 10 10-4.6 2-8 5.4-10 10-2-4.6-5.4-8-10-10 4.6-2 8-5.4 10-10Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <p class="auth-card-kicker">Welcome</p>
+            <h2 class="auth-card-title">Begin your journey</h2>
+            <p class="auth-card-copy">Register a profile or sign in with your Profile ID and PIN.</p>
+
+            <div id="authButtons" class="auth-actions">
+                <button type="button" id="btnCreateAccount" class="primary-btn auth-action-btn">Create a New Account</button>
+                <button type="button" id="btnShowLogin" class="secondary-btn auth-action-btn">Log In</button>
             </div>
 
-            <!-- Hidden Login Form -->
-            <div id="loginSection" style="display: none; margin-top: 15px;">
-                <h3 style="font-size: 1.1rem; color: var(--text); margin-bottom: 15px;">Enter your Profile ID & PIN</h3>
-                <input type="text" id="loginProfileId" placeholder="e.g. MAT-0001" style="text-align: center; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; height: 55px; font-size: 1.1rem;">
-                <!-- SECURE PIN FIELD -->
-                <input type="password" id="loginPin" placeholder="4-Digit PIN" maxlength="4" inputmode="numeric" style="text-align: center; margin-bottom: 15px; font-weight: bold; height: 55px; font-size: 1.1rem; letter-spacing: 5px;">
-                
-                <button type="button" id="btnSubmitLogin" class="primary-btn" style="width: 100%; height: 55px; font-size: 1.1rem; margin-bottom: 15px;">Secure Login</button>
+            <div id="loginSection" class="login-section" style="display: none;">
+                <h3 class="login-heading">Enter your Profile ID &amp; PIN</h3>
+                <label class="sr-only" for="loginProfileId">Profile ID</label>
+                <input type="text" id="loginProfileId" placeholder="e.g. MAT-0001" class="login-input login-id">
+                <label class="sr-only" for="loginPin">4-digit PIN</label>
+                <input type="password" id="loginPin" placeholder="4-Digit PIN" maxlength="4" inputmode="numeric" class="login-input login-pin">
+
+                <button type="button" id="btnSubmitLogin" class="primary-btn auth-action-btn">Secure Login</button>
                 <button type="button" id="btnBackToAuth" class="text-btn">← Back</button>
             </div>
         </div>
     </main>
 
     <!-- ================= REGISTER PAGE ================= -->
-    <main id="registerPage" class="page">
-        <div class="container">
-            <!-- PROGRESS -->
-            <div id="progressContainer" class="progress-card">
-                <div class="progress-top">
-                    <div>
-                        <strong>Profile completion</strong>
-                        <span id="completionText">0%</span>
-                    </div>
-                    <span id="completionStatus">Start filling your profile</span>
-                </div>
-                <div class="progress-track">
-                    <div id="completionBar" class="progress-bar"></div>
-                </div>
-            </div>
-
-            <!-- SUCCESS CONTAINER -->
-            <div id="successContainer" class="success-card hidden">
-                <h2>🎉 Registration Successful!</h2>
-                <p>Your profile has been added to the matrimonial database.</p>
-                <div class="id-display-box">
-                    <span>Your Unique ID is:</span>
-                    <strong id="displayId"></strong>
-                </div>
-                <br>
-                <button type="button" class="primary-btn" data-page="browsePage" style="margin-right: 10px;">Browse Profiles</button>
-                <button type="button" class="secondary-btn" data-page="dashboardPage">Go to Dashboard</button>
-            </div>
-
-            <!-- FORM WRAPPER -->
+    <!-- FORM WRAPPER -->
             <div id="formContainer">
                 <form id="profileForm">
-                    <!-- PROFILE PHOTO -->
-                    <div class="section full-width">
-                        <div class="section-heading">
-                            <span>📷</span>
-                            <div>
-                                <h2>Profile Photo</h2>
-                                <p>Upload a clear recent photograph</p>
-                            </div>
-                        </div>
-                        <div class="upload-section">
-                            <div class="photo-upload-box" id="photoUploadBox">
-                                <input type="file" id="photo" accept="image/jpeg,image/jpg,image/png">
-                                <div id="photoPreview" class="photo-preview">
-                                    <span class="upload-big-icon">📷</span>
-                                    <strong>Click to upload photo</strong>
-                                    <small>JPG, JPEG or PNG</small>
-                                </div>
-                                <button type="button" id="removePhoto" class="remove-file-btn">×</button>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="form-layout-split">
+                        <!-- LEFT SIDEBAR -->
+                        <aside class="form-sidebar">
+                            <ul id="formNav">
+                                <li class="active" data-target="sec-photo">📷 Profile Photo</li>
+                                <li data-target="sec-personal">👤 Personal Information</li>
+                                <li data-target="sec-education">🎓 Education & Career</li>
+                                <li data-target="sec-religion">🏠 Religion & Community</li>
+                                <li data-target="sec-family">👨‍👩‍👧 Family Details</li>
+                                <li data-target="sec-expectations">💭 About & Expectations</li>
+                                <li data-target="sec-preferences">❤️ Partner Preferences</li>
+                                <li data-target="sec-contact">📞 Contact Details</li>
+                                <li data-target="sec-biodata">📄 Biodata</li>
+                                <li data-target="sec-review" id="navReviewBtn" class="review-tab">✅ Review & Submit</li>
+                            </ul>
+                        </aside>
 
-                    <!-- PERSONAL INFORMATION -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>👤</span>
-                            <div class="heading-text">
-                                <h2>Personal Information</h2>
-                                <p>Basic information about the profile</p>
+                        <!-- RIGHT CONTENT AREA -->
+                        <div class="form-content-area">
+                            
+                            <!-- PROFILE PHOTO -->
+                            <div class="form-section active-section" id="sec-photo">
+                                <div class="section-heading">
+                                    <h2>📷 Profile Photo</h2>
+                                    <p>Upload a clear recent photograph</p>
+                                </div>
+                                <div class="upload-section">
+                                    <div class="photo-upload-box" id="photoUploadBox">
+                                        <input type="file" id="photo" accept="image/jpeg,image/jpg,image/png">
+                                        <div id="photoPreview" class="photo-preview">
+                                            <span class="upload-big-icon">📷</span>
+                                            <strong>Click to upload photo</strong>
+                                            <small>JPG, JPEG or PNG</small>
+                                        </div>
+                                        <button type="button" id="removePhoto" class="remove-file-btn">×</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-personal">Next: Personal Info →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="form-grid">
-                                <div class="field name-field">
-                                    <label for="name">Full Name <span class="req">*</span></label>
-                                    <span class="field-hint">Enter your full name</span>
-                                    <input type="text" id="name" placeholder="e.g. Rahul Sharma" required>
-                                </div>
-                                <div class="field">
-                                    <label for="dob">Date of Birth <span class="req">*</span></label>
-                                    <span class="field-hint">Enter date in DD/MM/YYYY format</span>
-                                    <input type="text" id="dob" placeholder="DD/MM/YYYY" pattern="(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}" maxlength="10" inputmode="numeric" required>
-                                </div>
-                                <!-- NEW SECURITY PIN FIELD -->
-                                <div class="field">
-                                    <label for="pin">Security PIN <span class="req">*</span></label>
-                                    <span class="field-hint">Create a 4-digit PIN for future logins</span>
-                                    <input type="password" id="pin" placeholder="e.g. 1234" maxlength="4" inputmode="numeric" required>
-                                </div>
-                                <div class="field small-field">
-                                    <label for="age">Age</label>
-                                    <span class="field-hint">Auto-calculated from date of birth</span>
-                                    <input type="number" id="age" placeholder="—" min="18" max="100" readonly required>
-                                </div>
-                                <div class="field">
-                                    <label for="gender">Gender <span class="req">*</span></label>
-                                    <span class="field-hint">Select gender</span>
-                                    <select id="gender" required>
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="city">City <span class="req">*</span></label>
-                                    <span class="field-hint">Current city of residence</span>
-                                    <input type="text" id="city" placeholder="e.g. Pune" required>
-                                </div>
-                                <div class="field">
-                                    <label for="state">State <span class="req">*</span></label>
-                                    <span class="field-hint">State of current residence</span>
-                                    <select id="state" required>
-                                        <option value="">Select State</option>
-                                        <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
-                                        <option>Assam</option><option>Bihar</option><option>Chhattisgarh</option>
-                                        <option>Goa</option><option>Gujarat</option><option>Haryana</option>
-                                        <option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option>
-                                        <option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option>
-                                        <option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
-                                        <option>Nagaland</option><option>Odisha</option><option>Punjab</option>
-                                        <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
-                                        <option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
-                                        <option>Uttarakhand</option><option>West Bengal</option><option>Delhi</option>
-                                        <option>Jammu and Kashmir</option><option>Ladakh</option><option>Other</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="height">Height <span class="req">*</span></label>
-                                    <span class="field-hint">Select your height</span>
-                                    <select id="height" required>
-                                        <option value="">Select Height</option>
-                                        <option>4'5" (135 cm)</option><option>4'6" (137 cm)</option>
-                                        <option>4'7" (140 cm)</option><option>4'8" (142 cm)</option>
-                                        <option>4'9" (145 cm)</option><option>4'10" (147 cm)</option>
-                                        <option>4'11" (150 cm)</option><option>5'0" (152 cm)</option>
-                                        <option>5'1" (155 cm)</option><option>5'2" (157 cm)</option>
-                                        <option>5'3" (160 cm)</option><option>5'4" (163 cm)</option>
-                                        <option>5'5" (165 cm)</option><option>5'6" (168 cm)</option>
-                                        <option>5'7" (170 cm)</option><option>5'8" (173 cm)</option>
-                                        <option>5'9" (175 cm)</option><option>5'10" (178 cm)</option>
-                                        <option>5'11" (180 cm)</option><option>6'0" (183 cm)</option>
-                                        <option>6'1" (185 cm)</option><option>6'2" (188 cm)</option>
-                                        <option>6'3" (191 cm)</option><option>6'4" (193 cm)</option>
-                                        <option>6'5" (196 cm)</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="weight">Weight</label>
-                                    <span class="field-hint">Weight in kilograms</span>
-                                    <input type="number" id="weight" placeholder="e.g. 70" min="30" max="200">
-                                </div>
-                                <div class="field">
-                                    <label for="physicalStatus">Physical Status <span class="req">*</span></label>
-                                    <span class="field-hint">Select physical status</span>
-                                    <select id="physicalStatus" required>
-                                        <option value="">Select Physical Status</option>
-                                        <option>Normal</option>
-                                        <option>Physically Challenged</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="maritalStatus">Marital Status</label>
-                                    <span class="field-hint">Select current marital status</span>
-                                    <select id="maritalStatus">
-                                        <option value="">Select Marital Status</option>
-                                        <option>Never Married</option><option>Divorced</option><option>Widowed</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- EDUCATION & CAREER -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>🎓</span>
-                            <div class="heading-text">
-                                <h2>Education & Career</h2>
-                                <p>Educational and professional information</p>
+                            <!-- PERSONAL INFORMATION -->
+                            <div class="form-section" id="sec-personal">
+                                <div class="section-heading">
+                                    <h2>👤 Personal Information</h2>
+                                    <p>Basic information about the profile</p>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="field name-field">
+                                        <label for="name">Full Name <span class="req">*</span></label>
+                                        <span class="field-hint">Enter your full name</span>
+                                        <input type="text" id="name" placeholder="e.g. Rahul Sharma" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="dob">Date of Birth <span class="req">*</span></label>
+                                        <span class="field-hint">Enter date in DD/MM/YYYY format</span>
+                                        <input type="text" id="dob" placeholder="DD/MM/YYYY" pattern="(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}" maxlength="10" inputmode="numeric" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="pin">Security PIN <span class="req">*</span></label>
+                                        <span class="field-hint">Create a 4-digit PIN for future logins</span>
+                                        <input type="password" id="pin" placeholder="e.g. 1234" maxlength="4" inputmode="numeric" required>
+                                    </div>
+                                    <div class="field small-field">
+                                        <label for="age">Age</label>
+                                        <span class="field-hint">Auto-calculated</span>
+                                        <input type="number" id="age" placeholder="—" min="18" max="100" readonly required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="gender">Gender <span class="req">*</span></label>
+                                        <span class="field-hint">Select gender</span>
+                                        <select id="gender" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="city">City <span class="req">*</span></label>
+                                        <span class="field-hint">Current city of residence</span>
+                                        <input type="text" id="city" placeholder="e.g. Pune" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="state">State <span class="req">*</span></label>
+                                        <span class="field-hint">State of current residence</span>
+                                        <select id="state" required>
+                                            <option value="">Select State</option>
+                                            <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                                            <option>Assam</option><option>Bihar</option><option>Chhattisgarh</option>
+                                            <option>Goa</option><option>Gujarat</option><option>Haryana</option>
+                                            <option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option>
+                                            <option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option>
+                                            <option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+                                            <option>Nagaland</option><option>Odisha</option><option>Punjab</option>
+                                            <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+                                            <option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                                            <option>Uttarakhand</option><option>West Bengal</option><option>Delhi</option>
+                                            <option>Jammu and Kashmir</option><option>Ladakh</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="height">Height <span class="req">*</span></label>
+                                        <span class="field-hint">Select your height</span>
+                                        <select id="height" required>
+                                            <option value="">Select Height</option>
+                                            <option>4'5" (135 cm)</option><option>4'6" (137 cm)</option>
+                                            <option>4'7" (140 cm)</option><option>4'8" (142 cm)</option>
+                                            <option>4'9" (145 cm)</option><option>4'10" (147 cm)</option>
+                                            <option>4'11" (150 cm)</option><option>5'0" (152 cm)</option>
+                                            <option>5'1" (155 cm)</option><option>5'2" (157 cm)</option>
+                                            <option>5'3" (160 cm)</option><option>5'4" (163 cm)</option>
+                                            <option>5'5" (165 cm)</option><option>5'6" (168 cm)</option>
+                                            <option>5'7" (170 cm)</option><option>5'8" (173 cm)</option>
+                                            <option>5'9" (175 cm)</option><option>5'10" (178 cm)</option>
+                                            <option>5'11" (180 cm)</option><option>6'0" (183 cm)</option>
+                                            <option>6'1" (185 cm)</option><option>6'2" (188 cm)</option>
+                                            <option>6'3" (191 cm)</option><option>6'4" (193 cm)</option>
+                                            <option>6'5" (196 cm)</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="weight">Weight</label>
+                                        <span class="field-hint">Weight in kilograms</span>
+                                        <input type="number" id="weight" placeholder="e.g. 70" min="30" max="200">
+                                    </div>
+                                    <div class="field">
+                                        <label for="physicalStatus">Physical Status <span class="req">*</span></label>
+                                        <span class="field-hint">Select physical status</span>
+                                        <select id="physicalStatus" required>
+                                            <option value="">Select Physical Status</option>
+                                            <option>Normal</option>
+                                            <option>Physically Challenged</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="maritalStatus">Marital Status</label>
+                                        <span class="field-hint">Select current marital status</span>
+                                        <select id="maritalStatus">
+                                            <option value="">Select Marital Status</option>
+                                            <option>Never Married</option><option>Divorced</option><option>Widowed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-education">Next: Education & Career →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="form-grid">
-                                <div class="field">
-                                    <label for="qualification">Qualification <span class="req">*</span></label>
-                                    <span class="field-hint">Highest qualification / field</span>
-                                    <select id="qualification" required>
-                                        <option value="">Select Qualification</option>
-                                        <option>Engineering</option><option>Doctor / Medical</option>
-                                        <option>Chartered Accountant (CA)</option><option>Lawyer</option>
-                                        <option>MBA</option><option>Pharmacy</option><option>Architecture</option>
-                                        <option>Pilot</option><option>Teaching / Education</option>
-                                        <option>Government Service</option><option>Business</option>
-                                        <option>Commerce</option><option>Science</option><option>Arts</option>
-                                        <option>Diploma</option><option>Other</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="job">Job / Profession</label>
-                                    <span class="field-hint">Current occupation</span>
-                                    <input type="text" id="job" placeholder="e.g. Software Engineer">
-                                </div>
-                                <div class="field full-field">
-                                    <label for="jobLocation">Current Place of Job</label>
-                                    <span class="field-hint">Where do you currently work?</span>
-                                    <input type="text" id="jobLocation" placeholder="e.g. Pune, Mumbai, Bengaluru">
-                                </div>
-                                <div class="field">
-                                    <label for="income">Annual Income <span class="req">*</span></label>
-                                    <span class="field-hint">Approximate annual income</span>
-                                    <select id="income" required>
-                                        <option value="">Select Annual Income</option>
-                                        <option>Below ₹2 Lakh</option><option>₹2 - ₹5 Lakh</option>
-                                        <option>₹5 - ₹10 Lakh</option><option>₹10 - ₹20 Lakh</option>
-                                        <option>₹20 - ₹30 Lakh</option><option>₹30 - ₹50 Lakh</option>
-                                        <option>₹50 Lakh - ₹1 Crore</option><option>Above ₹1 Crore</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="futurePlans">Future Plans</label>
-                                    <span class="field-hint">Career / education / personal plans</span>
-                                    <input type="text" id="futurePlans" placeholder="e.g. Higher studies, business...">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- RELIGION & COMMUNITY -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>🏠</span>
-                            <div class="heading-text">
-                                <h2>Religion & Community</h2>
-                                <p>Community-related information</p>
+                            <!-- EDUCATION & CAREER -->
+                            <div class="form-section" id="sec-education">
+                                <div class="section-heading">
+                                    <h2>🎓 Education & Career</h2>
+                                    <p>Educational and professional information</p>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label for="qualification">Qualification <span class="req">*</span></label>
+                                        <span class="field-hint">Highest qualification / field</span>
+                                        <select id="qualification" required>
+                                            <option value="">Select Qualification</option>
+                                            <option>Engineering</option><option>Doctor / Medical</option>
+                                            <option>Chartered Accountant (CA)</option><option>Lawyer</option>
+                                            <option>MBA</option><option>Pharmacy</option><option>Architecture</option>
+                                            <option>Pilot</option><option>Teaching / Education</option>
+                                            <option>Government Service</option><option>Business</option>
+                                            <option>Commerce</option><option>Science</option><option>Arts</option>
+                                            <option>Diploma</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="job">Job / Profession</label>
+                                        <span class="field-hint">Current occupation</span>
+                                        <input type="text" id="job" placeholder="e.g. Software Engineer">
+                                    </div>
+                                    <div class="field full-field">
+                                        <label for="jobLocation">Current Place of Job</label>
+                                        <span class="field-hint">Where do you currently work?</span>
+                                        <input type="text" id="jobLocation" placeholder="e.g. Pune, Mumbai, Bengaluru">
+                                    </div>
+                                    <div class="field">
+                                        <label for="income">Annual Income <span class="req">*</span></label>
+                                        <span class="field-hint">Approximate annual income</span>
+                                        <select id="income" required>
+                                            <option value="">Select Annual Income</option>
+                                            <option>Below ₹2 Lakh</option><option>₹2 - ₹5 Lakh</option>
+                                            <option>₹5 - ₹10 Lakh</option><option>₹10 - ₹20 Lakh</option>
+                                            <option>₹20 - ₹30 Lakh</option><option>₹30 - ₹50 Lakh</option>
+                                            <option>₹50 Lakh - ₹1 Crore</option><option>Above ₹1 Crore</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="futurePlans">Future Plans</label>
+                                        <span class="field-hint">Career / education / personal plans</span>
+                                        <input type="text" id="futurePlans" placeholder="e.g. Higher studies, business...">
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-religion">Next: Religion & Community →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="form-grid">
-                                <div class="field">
-                                    <label for="religion">Religion <span class="req">*</span></label>
-                                    <span class="field-hint">Select religion</span>
-                                    <select id="religion" required>
-                                        <option value="">Select Religion</option>
-                                        <option>Hindu</option><option>Jain</option><option>Buddhist</option>
-                                        <option>Sikh</option><option>Muslim</option><option>Christian</option><option>Other</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="subReligion">Sub-Religion</label>
-                                    <span class="field-hint">Select if applicable</span>
-                                    <select id="subReligion">
-                                        <option value="">Select Sub-Religion</option>
-                                        <option>Jain</option><option>Vaishnav</option><option>Shaiv</option>
-                                        <option>Shakta</option><option>Other</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="caste">Caste <span class="req">*</span></label>
-                                    <span class="field-hint">Select caste</span>
-                                    <select id="caste" required>
-                                        <option value="">Select Caste</option>
-                                        <option>Brahmin</option><option>Kshatriya</option><option>Vaishya</option>
-                                        <option>Maratha</option><option>Rajput</option><option>Jain</option>
-                                        <option>Baniya</option><option>Patel</option><option>Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- FAMILY DETAILS -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>👨‍👩‍👧</span>
-                            <div class="heading-text">
-                                <h2>Family Details</h2>
-                                <p>Information about family and background</p>
+                            <!-- RELIGION & COMMUNITY -->
+                            <div class="form-section" id="sec-religion">
+                                <div class="section-heading">
+                                    <h2>🏠 Religion & Community</h2>
+                                    <p>Community-related information</p>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label for="religion">Religion <span class="req">*</span></label>
+                                        <span class="field-hint">Select religion</span>
+                                        <select id="religion" required>
+                                            <option value="">Select Religion</option>
+                                            <option>Hindu</option><option>Jain</option><option>Buddhist</option>
+                                            <option>Sikh</option><option>Muslim</option><option>Christian</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="subReligion">Sub-Religion</label>
+                                        <span class="field-hint">Select if applicable</span>
+                                        <select id="subReligion">
+                                            <option value="">Select Sub-Religion</option>
+                                            <option>Jain</option><option>Vaishnav</option><option>Shaiv</option>
+                                            <option>Shakta</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="caste">Caste <span class="req">*</span></label>
+                                        <span class="field-hint">Select caste</span>
+                                        <select id="caste" required>
+                                            <option value="">Select Caste</option>
+                                            <option>Brahmin</option><option>Kshatriya</option><option>Vaishya</option>
+                                            <option>Maratha</option><option>Rajput</option><option>Jain</option>
+                                            <option>Baniya</option><option>Patel</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-family">Next: Family Details →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="form-grid">
-                                <div class="field">
-                                    <label for="fatherName">Father's Name</label>
-                                    <input type="text" id="fatherName" placeholder="Enter father's name">
-                                </div>
-                                <div class="field">
-                                    <label for="fatherOccupation">Father's Occupation</label>
-                                    <input type="text" id="fatherOccupation" placeholder="e.g. Business, Service">
-                                </div>
-                                <div class="field">
-                                    <label for="motherName">Mother's Name</label>
-                                    <input type="text" id="motherName" placeholder="Enter mother's name">
-                                </div>
-                                <div class="field">
-                                    <label for="motherOccupation">Mother's Occupation</label>
-                                    <input type="text" id="motherOccupation" placeholder="e.g. Homemaker, Service">
-                                </div>
-                                <div class="field">
-                                    <label for="brothers">Number of Brothers</label>
-                                    <input type="number" id="brothers" min="0" placeholder="0">
-                                </div>
-                                <div class="field">
-                                    <label for="sisters">Number of Sisters</label>
-                                    <input type="number" id="sisters" min="0" placeholder="0">
-                                </div>
-                                <div class="field">
-                                    <label for="familyType">Family Type</label>
-                                    <select id="familyType">
-                                        <option value="">Select Family Type</option>
-                                        <option>Nuclear</option><option>Joint</option><option>Extended</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="familyLocation">Family Location</label>
-                                    <input type="text" id="familyLocation" placeholder="e.g. Pune, Maharashtra">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- ABOUT & EXPECTATIONS -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>💭</span>
-                            <div class="heading-text">
-                                <h2>About & Expectations</h2>
-                                <p>Tell us about yourself and your expectations</p>
+                            <!-- FAMILY DETAILS -->
+                            <div class="form-section" id="sec-family">
+                                <div class="section-heading">
+                                    <h2>👨‍👩‍👧 Family Details</h2>
+                                    <p>Information about family and background</p>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label for="fatherName">Father's Name</label>
+                                        <input type="text" id="fatherName" placeholder="Enter father's name">
+                                    </div>
+                                    <div class="field">
+                                        <label for="fatherOccupation">Father's Occupation</label>
+                                        <input type="text" id="fatherOccupation" placeholder="e.g. Business, Service">
+                                    </div>
+                                    <div class="field">
+                                        <label for="motherName">Mother's Name</label>
+                                        <input type="text" id="motherName" placeholder="Enter mother's name">
+                                    </div>
+                                    <div class="field">
+                                        <label for="motherOccupation">Mother's Occupation</label>
+                                        <input type="text" id="motherOccupation" placeholder="e.g. Homemaker, Service">
+                                    </div>
+                                    <div class="field">
+                                        <label for="brothers">Number of Brothers</label>
+                                        <input type="number" id="brothers" min="0" placeholder="0">
+                                    </div>
+                                    <div class="field">
+                                        <label for="sisters">Number of Sisters</label>
+                                        <input type="number" id="sisters" min="0" placeholder="0">
+                                    </div>
+                                    <div class="field">
+                                        <label for="familyType">Family Type</label>
+                                        <select id="familyType">
+                                            <option value="">Select Family Type</option>
+                                            <option>Nuclear</option><option>Joint</option><option>Extended</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="familyLocation">Family Location</label>
+                                        <input type="text" id="familyLocation" placeholder="e.g. Pune, Maharashtra">
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-expectations">Next: About & Expectations →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="form-grid">
-                                <div class="field full-field">
-                                    <label for="aboutMe">About Me</label>
-                                    <span class="field-hint">Tell us something about yourself</span>
-                                    <textarea id="aboutMe" placeholder="Write a short introduction about yourself..."></textarea>
-                                </div>
-                                <div class="field full-field">
-                                    <label for="goals">Partner Expectations <span class="req">*</span></label>
-                                    <span class="field-hint">Describe your expectations from your future partner</span>
-                                    <textarea id="goals" placeholder="Describe your expectations..." required></textarea>
-                                </div>
-                                <div class="field">
-                                    <label for="diet">Dietary Preference</label>
-                                    <select id="diet">
-                                        <option value="">Select Preference</option>
-                                        <option>Vegetarian</option><option>Jain</option><option>Non-Vegetarian</option>
-                                        <option>Other</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="lifestyle">Lifestyle</label>
-                                    <select id="lifestyle">
-                                        <option value="">Select Lifestyle</option>
-                                        <option>Simple</option><option>Moderate</option><option>Modern</option><option>Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- PARTNER PREFERENCES -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>❤️</span>
-                            <div class="heading-text">
-                                <h2>Partner Preferences</h2>
-                                <p>Set basic preferences for suitable matches</p>
+                            <!-- ABOUT & EXPECTATIONS -->
+                            <div class="form-section" id="sec-expectations">
+                                <div class="section-heading">
+                                    <h2>💭 About & Expectations</h2>
+                                    <p>Tell us about yourself and your expectations</p>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="field full-field">
+                                        <label for="aboutMe">About Me</label>
+                                        <span class="field-hint">Tell us something about yourself</span>
+                                        <textarea id="aboutMe" placeholder="Write a short introduction about yourself..."></textarea>
+                                    </div>
+                                    <div class="field full-field">
+                                        <label for="goals">Partner Expectations <span class="req">*</span></label>
+                                        <span class="field-hint">Describe your expectations from your future partner</span>
+                                        <textarea id="goals" placeholder="Describe your expectations..." required></textarea>
+                                    </div>
+                                    <div class="field">
+                                        <label for="diet">Dietary Preference</label>
+                                        <select id="diet">
+                                            <option value="">Select Preference</option>
+                                            <option>Vegetarian</option><option>Jain</option><option>Non-Vegetarian</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="lifestyle">Lifestyle</label>
+                                        <select id="lifestyle">
+                                            <option value="">Select Lifestyle</option>
+                                            <option>Simple</option><option>Moderate</option><option>Modern</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-preferences">Next: Partner Preferences →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="form-grid">
-                                <div class="field">
-                                    <label for="partnerAgeMin">Preferred Minimum Age</label>
-                                    <input type="number" id="partnerAgeMin" min="18" max="100" placeholder="e.g. 24">
-                                </div>
-                                <div class="field">
-                                    <label for="partnerAgeMax">Preferred Maximum Age</label>
-                                    <input type="number" id="partnerAgeMax" min="18" max="100" placeholder="e.g. 30">
-                                </div>
-                                <div class="field">
-                                    <label for="partnerState">Preferred State</label>
-                                    <select id="partnerState">
-                                        <option value="">Any State</option>
-                                        <option>Andhra Pradesh</option><option>Gujarat</option><option>Karnataka</option>
-                                        <option>Madhya Pradesh</option><option>Maharashtra</option><option>Rajasthan</option>
-                                        <option>Telangana</option><option>Uttar Pradesh</option><option>Other</option>
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="partnerEducation">Preferred Education</label>
-                                    <select id="partnerEducation">
-                                        <option value="">Any Education</option>
-                                        <option>Engineering</option><option>Medical</option><option>MBA</option>
-                                        <option>CA</option><option>Law</option><option>Graduate</option><option>Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- CONTACT DETAILS -->
-                    <div class="section full-width collapsible-section collapsed">
-                        <button type="button" class="section-heading collapsible-heading" aria-expanded="false">
-                            <span>📞</span>
-                            <div class="heading-text">
-                                <h2>Contact Details</h2>
-                                <p>Private information for committee communication</p>
+                            <!-- PARTNER PREFERENCES -->
+                            <div class="form-section" id="sec-preferences">
+                                <div class="section-heading">
+                                    <h2>❤️ Partner Preferences</h2>
+                                    <p>Set basic preferences for suitable matches</p>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label for="partnerAgeMin">Preferred Minimum Age</label>
+                                        <input type="number" id="partnerAgeMin" min="18" max="100" placeholder="e.g. 24">
+                                    </div>
+                                    <div class="field">
+                                        <label for="partnerAgeMax">Preferred Maximum Age</label>
+                                        <input type="number" id="partnerAgeMax" min="18" max="100" placeholder="e.g. 30">
+                                    </div>
+                                    <div class="field">
+                                        <label for="partnerState">Preferred State</label>
+                                        <select id="partnerState">
+                                            <option value="">Any State</option>
+                                            <option>Andhra Pradesh</option><option>Gujarat</option><option>Karnataka</option>
+                                            <option>Madhya Pradesh</option><option>Maharashtra</option><option>Rajasthan</option>
+                                            <option>Telangana</option><option>Uttar Pradesh</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="partnerEducation">Preferred Education</label>
+                                        <select id="partnerEducation">
+                                            <option value="">Any Education</option>
+                                            <option>Engineering</option><option>Medical</option><option>MBA</option>
+                                            <option>CA</option><option>Law</option><option>Graduate</option><option>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-contact">Next: Contact Details →</button>
                             </div>
-                            <span class="collapse-arrow">▼</span>
-                        </button>
-                        <div class="collapsible-content">
-                            <div class="privacy-note">🔒 Contact information should not be shown publicly. It can be shared through the committee after approval.</div>
-                            <div class="form-grid">
-                                <div class="field">
-                                    <label for="phone">Mobile Number</label>
-                                    <input type="tel" id="phone" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number">
-                                </div>
-                                <div class="field">
-                                    <label for="email">Email Address</label>
-                                    <input type="email" id="email" placeholder="example@email.com">
-                                </div>
-                                <div class="field">
-                                    <label for="contactPerson">Contact Person</label>
-                                    <input type="text" id="contactPerson" placeholder="Parent / Guardian / Self">
-                                </div>
-                                <div class="field">
-                                    <label for="preferredContact">Preferred Contact Method</label>
-                                    <select id="preferredContact">
-                                        <option value="">Select Method</option>
-                                        <option>Phone</option><option>WhatsApp</option><option>Email</option>
-                                        <option>Through Committee</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- BIODATA -->
-                    <div class="section full-width">
-                        <div class="section-heading">
-                            <span>📄</span>
-                            <div>
-                                <h2>Biodata</h2>
-                                <p>Upload your existing biodata if available</p>
+                            <!-- CONTACT DETAILS -->
+                            <div class="form-section" id="sec-contact">
+                                <div class="section-heading">
+                                    <h2>📞 Contact Details</h2>
+                                    <p>Private information for committee communication</p>
+                                </div>
+                                <div class="privacy-note">🔒 Contact information should not be shown publicly. It can be shared through the committee after approval.</div>
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label for="phone">Mobile Number</label>
+                                        <input type="tel" id="phone" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number">
+                                    </div>
+                                    <div class="field">
+                                        <label for="email">Email Address</label>
+                                        <input type="email" id="email" placeholder="example@email.com">
+                                    </div>
+                                    <div class="field">
+                                        <label for="contactPerson">Contact Person</label>
+                                        <input type="text" id="contactPerson" placeholder="Parent / Guardian / Self">
+                                    </div>
+                                    <div class="field">
+                                        <label for="preferredContact">Preferred Contact Method</label>
+                                        <select id="preferredContact">
+                                            <option value="">Select Method</option>
+                                            <option>Phone</option><option>WhatsApp</option><option>Email</option>
+                                            <option>Through Committee</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="primary-btn next-btn" data-next="sec-biodata">Next: Biodata →</button>
                             </div>
-                        </div>
-                        <div class="biodata-upload-box">
-                            <input type="file" id="biodata" accept=".pdf,.doc,.docx">
-                            <div id="biodataContent" class="biodata-content">
-                                <span class="upload-icon">📄</span>
-                                <div>
-                                    <strong>Upload your Biodata</strong>
-                                    <p>PDF, DOC or DOCX</p>
+
+                            <!-- BIODATA -->
+                            <div class="form-section" id="sec-biodata">
+                                <div class="section-heading">
+                                    <h2>📄 Biodata</h2>
+                                    <p>Upload your existing biodata if available</p>
+                                </div>
+                                <div class="biodata-upload-box">
+                                    <input type="file" id="biodata" accept=".pdf,.doc,.docx">
+                                    <div id="biodataContent" class="biodata-content">
+                                        <span class="upload-icon">📄</span>
+                                        <div>
+                                            <strong>Upload your Biodata</strong>
+                                            <p>PDF, DOC or DOCX</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="removeBiodata" class="remove-biodata-btn">×</button>
+                                </div>
+                                <div id="biodataName" class="selected-file-name"></div>
+                                <button type="button" class="primary-btn next-btn review-highlight" data-next="sec-review">Proceed to Review ✅</button>
+                            </div>
+
+                            <!-- REVIEW & SUBMIT SECTION -->
+                            <div class="form-section" id="sec-review">
+                                <div class="section-heading">
+                                    <h2>✅ Review Your Application</h2>
+                                    <p>Please check your details carefully before submitting.</p>
+                                </div>
+                                
+                                <div id="reviewContent" class="review-grid">
+                                    <!-- Populated dynamically by JavaScript -->
+                                </div>
+
+                                <div class="submit-section full-width" style="margin-top: 30px;">
+                                    <button type="submit" class="submit-btn" id="submitBtn">
+                                        <span id="submitText">Final Submit Profile</span>
+                                        <span>→</span>
+                                    </button>
+                                    <p class="submit-note">🔒 Your information will be handled securely by the matrimonial committee.</p>
                                 </div>
                             </div>
-                            <button type="button" id="removeBiodata" class="remove-biodata-btn">×</button>
-                        </div>
-                        <div id="biodataName" class="selected-file-name"></div>
-                    </div>
 
-                    <!-- SUBMIT -->
-                    <div class="submit-section full-width">
-                        <button type="submit" class="submit-btn" id="submitBtn">
-                            <span id="submitText">Submit Profile</span>
-                            <span>→</span>
-                        </button>
-                        <p class="submit-note">🔒 Your information will be handled securely by the matrimonial committee.</p>
+                        </div>
                     </div>
                 </form>
-            </div>
-            <div id="message"></div>
-        </div>
+           </div>
     </main>
 
     <!-- ================= BROWSE PAGE ================= -->
@@ -530,19 +518,18 @@
         <div class="wide-container">
             <div class="page-header">
                 <div>
-                    <span class="eyebrow">DISCOVER</span>
-                    <h1 style="font-size: 1.8rem; margin-top: 5px;">Browse Profiles</h1>
-                    <p style="margin-top: 5px; margin-bottom: 0;">Search profiles using the information that matters to you.</p>
+                    <span class="eyebrow">Discover</span>
+                    <h1>Browse Profiles</h1>
+                    <p>Search with the details that matter to your family — city, community, education, and more.</p>
                 </div>
             </div>
 
-            <!-- Advanced Search & Filters -->
             <section class="search-panel">
-                <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--purple-dark); font-weight: 600;">Advanced Search</h3>
+                <h3 class="search-panel-title">Advanced Search</h3>
                 <div class="search-main">
-                    <input type="search" id="profileSearch" placeholder="🔍 Search by name, city, profession or Profile ID">
+                    <input type="search" id="profileSearch" placeholder="Search by name, city, profession or Profile ID">
                 </div>
-                <div class="filter-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: center; gap: 15px;">
+                <div class="filter-grid">
                     <select id="filterGender">
                         <option value="">Any Gender</option><option>Male</option><option>Female</option>
                     </select>
@@ -568,11 +555,11 @@
                     <select id="filterSort">
                         <option value="newest">Newest</option><option value="ageLow">Age: Low to High</option>
                     </select>
-                    <button type="button" id="applyFiltersBtn" class="primary-btn" style="height: 52px; margin: 0; width: 100%;">Search Profiles</button>
+                    <button type="button" id="applyFiltersBtn" class="primary-btn search-submit">Search Profiles</button>
                 </div>
             </section>
 
-            <div id="profileCount" class="result-count" style="margin-top: 10px; font-weight: 600;">All Registered Profiles</div>
+            <div id="profileCount" class="result-count">All Registered Profiles</div>
             <div id="profileGrid" class="profile-grid"></div>
         </div>
     </main>
@@ -582,9 +569,9 @@
         <div class="wide-container">
             <div class="page-header">
                 <div>
-                    <span class="eyebrow">MY SPACE</span>
+                    <span class="eyebrow">My Space</span>
                     <h1>My Dashboard</h1>
-                    <p>Manage your profile, interests and shortlisted profiles.</p>
+                    <p>Manage your profile, interests and shortlisted matches.</p>
                 </div>
                 <button class="primary-btn" type="button" data-page="browsePage">Browse Matches</button>
             </div>
@@ -592,7 +579,7 @@
             <div class="dashboard-grid">
                 <section class="dashboard-card profile-summary-card">
                     <div class="card-title-row">
-                        <div><span class="eyebrow">YOUR PROFILE</span><h2 id="dashName">No profile yet</h2></div>
+                        <div><span class="eyebrow">Your Profile</span><h2 id="dashName">No profile yet</h2></div>
                         <span id="dashStatus" class="status-badge pending">Not submitted</span>
                     </div>
                     <div class="dash-id" id="dashId">Profile ID —</div>
@@ -607,16 +594,16 @@
                 </section>
 
                 <div class="stats-grid">
-                    <div class="stat-card"><span>❤️</span><strong id="shortlistCount">0</strong><small>Shortlisted</small></div>
-                    <div class="stat-card"><span>💌</span><strong id="interestCount">0</strong><small>Interests Sent</small></div>
-                    <div class="stat-card"><span>📩</span><strong>0</strong><small>Requests Received</small></div>
-                    <div class="stat-card"><span>🔔</span><strong>0</strong><small>Notifications</small></div>
+                    <div class="stat-card"><span>Shortlisted</span><strong id="shortlistCount">0</strong><small>Saved matches</small></div>
+                    <div class="stat-card"><span>Interests Sent</span><strong id="interestCount">0</strong><small>Introductions requested</small></div>
+                    <div class="stat-card"><span>Requests Received</span><strong>0</strong><small>Awaiting response</small></div>
+                    <div class="stat-card"><span>Notifications</span><strong>0</strong><small>Committee updates</small></div>
                 </div>
             </div>
 
             <section class="dashboard-card">
                 <div class="card-title-row">
-                    <div><span class="eyebrow">SAVED</span><h2>Shortlisted Profiles</h2></div>
+                    <div><span class="eyebrow">Saved</span><h2>Shortlisted Profiles</h2></div>
                     <button class="text-btn" type="button" data-page="browsePage">Browse more →</button>
                 </div>
                 <div id="shortlistGrid" class="mini-profile-grid">
@@ -631,7 +618,7 @@
         <div class="wide-container">
             <div class="page-header">
                 <div>
-                    <span class="eyebrow">COMMITTEE</span>
+                    <span class="eyebrow">Committee</span>
                     <h1>Committee Dashboard</h1>
                     <p>Manage submitted profiles and verification status.</p>
                 </div>
@@ -645,7 +632,7 @@
             </div>
             <section class="dashboard-card">
                 <div class="card-title-row">
-                    <div><span class="eyebrow">PROFILE MANAGEMENT</span><h2>Submitted Profiles</h2></div>
+                    <div><span class="eyebrow">Profile Management</span><h2>Submitted Profiles</h2></div>
                     <input class="admin-search" id="adminSearch" placeholder="Search Profile ID / name">
                 </div>
                 <div class="table-wrap">
@@ -660,7 +647,6 @@
         </div>
     </main>
 
-    <!-- PROFILE MODAL -->
     <div id="profileModal" class="modal hidden">
         <div class="modal-backdrop" data-close-modal></div>
         <div class="modal-card">
@@ -671,15 +657,14 @@
 
 </div>
 
-<!-- ================= PREMIUM THEME MENU ================= -->
 <div class="theme-menu-container">
     <div id="themeDropdown" class="theme-dropdown hidden">
-        <button type="button" class="theme-option" data-theme-val="default">✨ Classic Purple</button>
-        <button type="button" class="theme-option" data-theme-val="midnight">🌙 Midnight Blue</button>
-        <button type="button" class="theme-option" data-theme-val="rose">🌸 Rose Gold</button>
+        <button type="button" class="theme-option" data-theme-val="default">Ivory &amp; Gold</button>
+        <button type="button" class="theme-option" data-theme-val="midnight">Royal Night</button>
+        <button type="button" class="theme-option" data-theme-val="rose">Sandalwood</button>
     </div>
     <button type="button" id="btnThemeToggle" class="theme-toggle-btn">
-        <span id="themeIcon">✨</span> Change Theme
+        <span id="themeIcon">✦</span> Appearance
     </button>
 </div>
 

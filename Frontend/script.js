@@ -46,14 +46,97 @@ navLinks.forEach(link => {
     });
 });
 
-document.querySelectorAll(".collapsible-heading").forEach(heading => {
-    heading.addEventListener("click", function () {
-        const section = this.closest(".collapsible-section");
-        const isExpanded = this.getAttribute("aria-expanded") === "true";
-        this.setAttribute("aria-expanded", String(!isExpanded));
-        section.classList.toggle("collapsed", isExpanded);
-    })
+/* =========================================
+   SIDEBAR FORM NAVIGATION & REVIEW SYNC
+========================================= */
+const formNavItems = document.querySelectorAll('#formNav li');
+const formSections = document.querySelectorAll('.form-section');
+const nextButtons = document.querySelectorAll('.next-btn');
+
+function switchFormSection(targetId) {
+    if (!targetId) return;
+
+    // Hide all sections and remove active class from sidebar
+    formSections.forEach(sec => sec.classList.remove('active-section'));
+    formNavItems.forEach(nav => nav.classList.remove('active'));
+
+    // Show target section and highlight sidebar item
+    const targetSection = document.getElementById(targetId);
+    const targetNav = document.querySelector(`[data-target="${targetId}"]`);
+    
+    if (targetSection) targetSection.classList.add('active-section');
+    if (targetNav) targetNav.classList.add('active');
+
+    // If Review tab is opened, dynamically generate the summary
+    if (targetId === 'sec-review') {
+        generateReviewSummary();
+    }
+    
+    // Check for completions
+    if (typeof updateSectionProgress === 'function') {
+        updateSectionProgress();
+    }
+    
+    // Scroll to top of the form area so the user sees the new section
+    const formLayout = document.querySelector('.form-layout-split');
+    if (formLayout) {
+        formLayout.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Sidebar Click Listener
+formNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+        switchFormSection(item.getAttribute('data-target'));
+    });
 });
+
+// "Next" Button Click Listener
+nextButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        switchFormSection(btn.getAttribute('data-next'));
+    });
+});
+
+// Dynamic Review Generator
+function generateReviewSummary() {
+    const reviewContent = document.getElementById('reviewContent');
+    if (!reviewContent) return;
+    
+    // Key-Value map of input IDs to readable labels
+    const fieldsToReview = [
+        { id: 'name', label: 'Full Name' },
+        { id: 'dob', label: 'Date of Birth' },
+        { id: 'gender', label: 'Gender' },
+        { id: 'city', label: 'City' },
+        { id: 'state', label: 'State' },
+        { id: 'height', label: 'Height' },
+        { id: 'qualification', label: 'Qualification' },
+        { id: 'job', label: 'Profession' },
+        { id: 'income', label: 'Annual Income' },
+        { id: 'religion', label: 'Religion' },
+        { id: 'caste', label: 'Caste' },
+        { id: 'phone', label: 'Mobile Number' },
+        { id: 'email', label: 'Email' }
+    ];
+
+    let html = '';
+    fieldsToReview.forEach(field => {
+        const inputElement = document.getElementById(field.id);
+        const value = (inputElement && inputElement.value.trim() !== "") 
+            ? inputElement.value 
+            : '<span style="color:var(--pink); font-size:0.85em;">Not Provided</span>';
+        
+        html += `
+            <div class="review-item">
+                <span class="review-label">${field.label}</span>
+                <span class="review-value">${value}</span>
+            </div>
+        `;
+    });
+
+    reviewContent.innerHTML = html;
+}
 
 /* AUTOMATIC AGE CALCULATION FROM DOB */
 const dobInput = document.getElementById("dob");
@@ -99,7 +182,6 @@ if (photoInput) {
         reader.onload = function (event) {
             const img = new Image();
             img.onload = function() {
-                // 1. Create a canvas to crop to a perfect 1:1 square
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 const size = Math.min(img.width, img.height);
@@ -110,17 +192,14 @@ if (photoInput) {
                 const x = (img.width - size) / 2;
                 const y = (img.height - size) / 2;
                 
-                // 2. Apply a subtle premium enhancement filter
                 ctx.filter = 'brightness(1.02) contrast(1.05) saturate(1.1)';
-                
-                // 3. Draw cropped image
                 ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
                 
-                // 4. Export as compressed JPEG
                 finalPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
                 
                 photoPreview.innerHTML = `<img src="${finalPhotoBase64}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`;
                 if (removePhotoBtn) removePhotoBtn.style.display = "flex";
+                if (typeof updateSectionProgress === 'function') updateSectionProgress();
             };
             img.src = event.target.result;
         }
@@ -135,6 +214,7 @@ if (removePhotoBtn) {
         finalPhotoBase64 = null;
         if (photoPreview) photoPreview.innerHTML = originalPhotoHTML;
         removePhotoBtn.style.display = "none";
+        if (typeof updateSectionProgress === 'function') updateSectionProgress();
     });
 }
 
@@ -152,8 +232,8 @@ if (form) {
             name: document.getElementById("name").value,
             dob: document.getElementById("dob").value,
             age: document.getElementById("age").value,
-            pin: document.getElementById("pin").value, // Captured PIN
-            photo_base64: finalPhotoBase64, // Processed Photo
+            pin: document.getElementById("pin").value,
+            photo_base64: finalPhotoBase64,
             gender: document.getElementById("gender").value,
             city: document.getElementById("city").value,
             state: document.getElementById("state").value,
@@ -187,7 +267,6 @@ if (form) {
                 
                 document.getElementById('formContainer').style.display = 'none';
                 
-                // FIX: Remove the 'hidden' class so the CSS !important rule stops blocking it
                 const successBox = document.getElementById('successContainer');
                 successBox.classList.remove('hidden');
                 successBox.style.display = 'block';
@@ -203,12 +282,12 @@ if (form) {
             alert("Could not connect to the server.");
         }
         submitBtn.disabled = false;
-        submitText.textContent = "Submit Profile";
+        submitText.textContent = "Final Submit Profile";
     });
 }
 
 /* =========================================
-   AUTHENTICATION LOGIC (API VALIDATED)
+   AUTHENTICATION LOGIC
 ========================================= */
 const authPage = document.getElementById('authPage');
 const mainNavigation = document.getElementById('mainNavigation');
@@ -229,7 +308,6 @@ function unlockApp(role) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // If a session exists, allow them in (Assuming token/ID is valid for session)
     const savedId = localStorage.getItem("registeredProfileId");
     if (savedId && authPage) {
         mainNavigation.style.display = 'flex';
@@ -256,7 +334,6 @@ document.getElementById('btnBackToAuth')?.addEventListener('click', () => {
     document.getElementById('authButtons').style.display = 'flex';
 });
 
-// SECURE LOGIN API CALL
 document.getElementById('btnSubmitLogin')?.addEventListener('click', async () => {
     const id = document.getElementById('loginProfileId').value.trim().toUpperCase();
     const pin = document.getElementById('loginPin').value.trim();
@@ -329,9 +406,8 @@ async function fetchAndRenderProfiles(reset = false) {
         const res = await fetch(`https://matrimonial-api-0097.onrender.com/api/profiles?page=${currentPage}&limit=12`);
         let profiles = await res.json();
         
-        if (profiles.length < 12) hasMoreProfiles = false; // Reached the end of DB
+        if (profiles.length < 12) hasMoreProfiles = false;
 
-        // Client-Side Filters (Note: In production, filter in SQL for better performance)
         const searchTxt = document.getElementById('profileSearch')?.value.toLowerCase() || "";
         const gender = document.getElementById('filterGender')?.value;
         const state = document.getElementById('filterState')?.value;
@@ -376,10 +452,8 @@ async function fetchAndRenderProfiles(reset = false) {
     isFetching = false;
 }
 
-// Search Button Trigger (Resets list)
 document.getElementById('applyFiltersBtn')?.addEventListener('click', () => fetchAndRenderProfiles(true));
 
-// Infinite Scroll Window Listener
 window.addEventListener('scroll', () => {
     if (document.getElementById('browsePage').classList.contains('active-page')) {
         const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
@@ -448,3 +522,51 @@ document.querySelectorAll('.theme-option').forEach(btn => {
 
 const savedTheme = localStorage.getItem('appTheme') || 'default';
 document.documentElement.setAttribute('data-theme', savedTheme);
+
+/* =========================================
+   REAL-TIME SECTION COMPLETION CHECKER
+========================================= */
+function updateSectionProgress() {
+    const formSectionsForProgress = document.querySelectorAll('.form-section');
+    
+    formSectionsForProgress.forEach(sec => {
+        if (sec.id === 'sec-review') return; // Skip the review tab itself
+
+        // Find all fields marked as "required" in the HTML for this specific section
+        const requiredFields = sec.querySelectorAll('input[required], select[required], textarea[required]');
+        let isComplete = true;
+
+        if (requiredFields.length > 0) {
+            // Check if every required field has a value
+            requiredFields.forEach(field => {
+                if (!field.value || field.value.trim() === '') {
+                    isComplete = false;
+                }
+            });
+        } else {
+            // Custom check for the Photo section
+            if (sec.id === 'sec-photo') {
+                isComplete = (typeof finalPhotoBase64 !== 'undefined' && finalPhotoBase64 !== null);
+            } else {
+                isComplete = true; 
+            }
+        }
+
+        // Apply or remove the glowing checkmark class on the sidebar
+        const navItem = document.querySelector(`[data-target="${sec.id}"]`);
+        if (navItem) {
+            if (isComplete) {
+                navItem.classList.add('completed');
+            } else {
+                navItem.classList.remove('completed');
+            }
+        }
+    });
+}
+
+// Trigger the progress check every time the user types, selects an option, or uploads a file
+const profileFormElement = document.getElementById('profileForm');
+if (profileFormElement) {
+    profileFormElement.addEventListener('input', updateSectionProgress);
+    profileFormElement.addEventListener('change', updateSectionProgress);
+}
