@@ -81,6 +81,13 @@
     <!-- FORM WRAPPER -->
             <div id="formContainer">
                 <form id="profileForm">
+                    <div class="form-progress-header">
+                        <div class="form-progress-label">
+                            <span>Profile completion</span>
+                            <strong id="formCompletionPercent">0%</strong>
+                        </div>
+                        <div class="progress-track"><div id="formProgressBar" class="progress-bar"></div></div>
+                    </div>
                     <div class="form-layout-split">
                         <!-- LEFT SIDEBAR -->
                         <aside class="form-sidebar">
@@ -96,6 +103,8 @@
                                 <li data-target="sec-biodata">📄 Biodata</li>
                                 <li data-target="sec-review" id="navReviewBtn" class="review-tab">✅ Review & Submit</li>
                             </ul>
+                            <button type="button" id="saveExitBtn" class="secondary-btn save-exit-btn">💾 Save &amp; Exit</button>
+                            <p class="save-exit-hint">Your progress is saved automatically, so you won't lose it.</p>
                         </aside>
 
                         <!-- RIGHT CONTENT AREA -->
@@ -652,6 +661,27 @@
         <div class="modal-card">
             <button class="modal-close" type="button" data-close-modal>×</button>
             <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- ================= PHOTO CROP MODAL ================= -->
+    <div id="photoCropModal" class="modal hidden">
+        <div class="modal-backdrop" data-close-crop></div>
+        <div class="modal-card crop-modal-card">
+            <button class="modal-close" type="button" data-close-crop>×</button>
+            <h3 class="crop-modal-title">Adjust Your Photo</h3>
+            <p class="crop-modal-subtitle">Drag to reposition and use the slider to zoom, then crop.</p>
+            <div class="crop-stage" id="cropStage">
+                <img id="cropImage" alt="Photo to crop" draggable="false">
+            </div>
+            <div class="crop-zoom-row">
+                <span aria-hidden="true">🔍</span>
+                <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1">
+            </div>
+            <div class="crop-modal-actions">
+                <button type="button" id="cropCancelBtn" class="secondary-btn">Cancel</button>
+                <button type="button" id="cropConfirmBtn" class="primary-btn">Use This Photo</button>
+            </div>
         </div>
     </div>
 

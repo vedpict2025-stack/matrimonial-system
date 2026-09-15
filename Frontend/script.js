@@ -167,13 +167,75 @@ if (dobInput && ageInput) {
 }
 
 /* =========================================
-   BUILT-IN PHOTO EDITOR (Canvas Center-Crop & Filter)
+   BUILT-IN PHOTO EDITOR (Preview + Drag/Zoom Crop)
 ========================================= */
 const photoInput = document.getElementById("photo");
 const photoPreview = document.getElementById("photoPreview");
 const removePhotoBtn = document.getElementById("removePhoto");
 let originalPhotoHTML = photoPreview ? photoPreview.innerHTML : "";
-let finalPhotoBase64 = null; // Stores the edited image
+let finalPhotoBase64 = null; // Stores the final cropped image
+
+// Crop modal elements
+const photoCropModal = document.getElementById("photoCropModal");
+const cropStage = document.getElementById("cropStage");
+const cropImageEl = document.getElementById("cropImage");
+const cropZoomSlider = document.getElementById("cropZoom");
+const cropCancelBtn = document.getElementById("cropCancelBtn");
+const cropConfirmBtn = document.getElementById("cropConfirmBtn");
+
+const CROP_STAGE_SIZE = 280;   // Must match .crop-stage width/height in CSS
+const CROP_OUTPUT_SIZE = 480;  // Final saved photo resolution
+
+let cropMinScale = 1;
+let cropScale = 1;
+let cropOffsetX = 0;
+let cropOffsetY = 0;
+let cropNaturalWidth = 0;
+let cropNaturalHeight = 0;
+let isDraggingCrop = false;
+let cropDragStartX = 0;
+let cropDragStartY = 0;
+let cropDragOffsetStartX = 0;
+let cropDragOffsetStartY = 0;
+
+function renderCropTransform() {
+    if (!cropImageEl) return;
+    cropImageEl.style.width = (cropNaturalWidth * cropScale) + "px";
+    cropImageEl.style.height = (cropNaturalHeight * cropScale) + "px";
+    cropImageEl.style.transform = `translate(${cropOffsetX}px, ${cropOffsetY}px)`;
+}
+
+function clampCropOffsets() {
+    const scaledW = cropNaturalWidth * cropScale;
+    const scaledH = cropNaturalHeight * cropScale;
+    const minX = Math.min(0, CROP_STAGE_SIZE - scaledW);
+    const minY = Math.min(0, CROP_STAGE_SIZE - scaledH);
+    cropOffsetX = Math.max(minX, Math.min(0, cropOffsetX));
+    cropOffsetY = Math.max(minY, Math.min(0, cropOffsetY));
+}
+
+function openCropModal(dataUrl) {
+    if (!photoCropModal || !cropImageEl) return;
+    cropImageEl.onload = function () {
+        cropNaturalWidth = cropImageEl.naturalWidth;
+        cropNaturalHeight = cropImageEl.naturalHeight;
+        // Smallest scale that still lets the image fully cover the round crop stage
+        cropMinScale = Math.max(CROP_STAGE_SIZE / cropNaturalWidth, CROP_STAGE_SIZE / cropNaturalHeight);
+        cropScale = cropMinScale;
+        cropOffsetX = (CROP_STAGE_SIZE - cropNaturalWidth * cropScale) / 2;
+        cropOffsetY = (CROP_STAGE_SIZE - cropNaturalHeight * cropScale) / 2;
+        clampCropOffsets();
+        if (cropZoomSlider) cropZoomSlider.value = "1";
+        renderCropTransform();
+        photoCropModal.classList.remove("hidden");
+    };
+    cropImageEl.src = dataUrl;
+}
+
+function closeCropModal(resetInput) {
+    if (photoCropModal) photoCropModal.classList.add("hidden");
+    if (resetInput && photoInput) photoInput.value = "";
+}
 
 if (photoInput) {
     photoInput.addEventListener("change", function () {
@@ -182,32 +244,97 @@ if (photoInput) {
 
         const reader = new FileReader();
         reader.onload = function (event) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const size = Math.min(img.width, img.height);
-                
-                canvas.width = size;
-                canvas.height = size;
-                
-                const x = (img.width - size) / 2;
-                const y = (img.height - size) / 2;
-                
-                ctx.filter = 'brightness(1.02) contrast(1.05) saturate(1.1)';
-                ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
-                
-                finalPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
-                
-                photoPreview.innerHTML = `<img src="${finalPhotoBase64}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`;
-                if (removePhotoBtn) removePhotoBtn.style.display = "flex";
-                if (typeof updateSectionProgress === 'function') updateSectionProgress();
-            };
-            img.src = event.target.result;
-        }
+            openCropModal(event.target.result);
+        };
         reader.readAsDataURL(file);
     });
 }
+
+// Zoom slider — keeps the center point of the stage fixed while zooming
+if (cropZoomSlider) {
+    cropZoomSlider.addEventListener("input", function () {
+        const zoomFactor = parseFloat(this.value) || 1;
+        const stageCenterX = CROP_STAGE_SIZE / 2;
+        const stageCenterY = CROP_STAGE_SIZE / 2;
+        const imgPointX = (stageCenterX - cropOffsetX) / cropScale;
+        const imgPointY = (stageCenterY - cropOffsetY) / cropScale;
+
+        cropScale = cropMinScale * zoomFactor;
+        cropOffsetX = stageCenterX - imgPointX * cropScale;
+        cropOffsetY = stageCenterY - imgPointY * cropScale;
+
+        clampCropOffsets();
+        renderCropTransform();
+    });
+}
+
+// Drag to reposition (mouse + touch via Pointer Events)
+if (cropStage) {
+    cropStage.addEventListener("pointerdown", function (e) {
+        isDraggingCrop = true;
+        cropStage.classList.add("dragging");
+        cropDragStartX = e.clientX;
+        cropDragStartY = e.clientY;
+        cropDragOffsetStartX = cropOffsetX;
+        cropDragOffsetStartY = cropOffsetY;
+        cropStage.setPointerCapture(e.pointerId);
+    });
+
+    cropStage.addEventListener("pointermove", function (e) {
+        if (!isDraggingCrop) return;
+        cropOffsetX = cropDragOffsetStartX + (e.clientX - cropDragStartX);
+        cropOffsetY = cropDragOffsetStartY + (e.clientY - cropDragStartY);
+        clampCropOffsets();
+        renderCropTransform();
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach(evt => {
+        cropStage.addEventListener(evt, function () {
+            isDraggingCrop = false;
+            cropStage.classList.remove("dragging");
+        });
+    });
+}
+
+// Confirm crop -> bake the visible circle into the final square photo
+if (cropConfirmBtn) {
+    cropConfirmBtn.addEventListener("click", function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = CROP_OUTPUT_SIZE;
+        canvas.height = CROP_OUTPUT_SIZE;
+        const ctx = canvas.getContext("2d");
+
+        const sourceX = -cropOffsetX / cropScale;
+        const sourceY = -cropOffsetY / cropScale;
+        const sourceSize = CROP_STAGE_SIZE / cropScale;
+
+        ctx.filter = "brightness(1.02) contrast(1.05) saturate(1.1)";
+        ctx.drawImage(cropImageEl, sourceX, sourceY, sourceSize, sourceSize, 0, 0, CROP_OUTPUT_SIZE, CROP_OUTPUT_SIZE);
+
+        finalPhotoBase64 = canvas.toDataURL("image/jpeg", 0.85);
+
+        if (photoPreview) {
+            photoPreview.innerHTML = `<img src="${finalPhotoBase64}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`;
+        }
+        if (removePhotoBtn) removePhotoBtn.style.display = "flex";
+
+        closeCropModal(false);
+        if (typeof updateSectionProgress === "function") updateSectionProgress();
+        if (typeof saveDraftToLocalStorage === "function") saveDraftToLocalStorage();
+    });
+}
+
+if (cropCancelBtn) {
+    cropCancelBtn.addEventListener("click", function () {
+        closeCropModal(true);
+    });
+}
+
+document.querySelectorAll("[data-close-crop]").forEach(el => {
+    el.addEventListener("click", function () {
+        closeCropModal(true);
+    });
+});
 
 if (removePhotoBtn) {
     removePhotoBtn.addEventListener("click", function (event) {
@@ -217,6 +344,7 @@ if (removePhotoBtn) {
         if (photoPreview) photoPreview.innerHTML = originalPhotoHTML;
         removePhotoBtn.style.display = "none";
         if (typeof updateSectionProgress === 'function') updateSectionProgress();
+        if (typeof saveDraftToLocalStorage === 'function') saveDraftToLocalStorage();
     });
 }
 

@@ -1309,6 +1309,74 @@ button, .nav-link {
 
 
 /* =========================================
+   FORM COMPLETION PROGRESS HEADER
+========================================= */
+.form-progress-header {
+    background: var(--surface);
+    padding: 16px 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px var(--shadow);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 10px;
+    z-index: 5;
+}
+
+.form-progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.form-progress-label strong {
+    color: var(--maroon);
+    font-size: 15px;
+}
+
+/* =========================================
+   SAVE & EXIT
+========================================= */
+.save-exit-btn {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.save-exit-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+}
+
+.toast-msg {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--maroon);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    z-index: 3000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-msg.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* =========================================
    FORM SPLIT LAYOUT (SIDEBAR + CONTENT)
 ========================================= */
 .form-layout-split {
@@ -1470,4 +1538,75 @@ button, .nav-link {
 @keyframes popInCheck {
     0% { transform: translateY(-50%) scale(0); opacity: 0; }
     100% { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+/* =========================================
+   PHOTO CROP MODAL
+========================================= */
+.crop-modal-card {
+    text-align: center;
+    width: min(400px, 100%);
+}
+
+.crop-modal-title {
+    margin: 0 0 4px;
+    color: var(--text);
+}
+
+.crop-modal-subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 18px;
+}
+
+.crop-stage {
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    background: var(--input-bg);
+    border: 3px solid var(--gold);
+    cursor: grab;
+    touch-action: none;
+}
+
+.crop-stage.dragging {
+    cursor: grabbing;
+}
+
+.crop-stage img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    max-height: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    transform-origin: 0 0;
+}
+
+.crop-zoom-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 280px;
+    margin: 0 auto 22px;
+}
+
+.crop-zoom-row input[type="range"] {
+    flex: 1;
+}
+
+.crop-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.crop-modal-actions .primary-btn,
+.crop-modal-actions .secondary-btn {
+    flex: 1;
+    max-width: 160px;
 }
