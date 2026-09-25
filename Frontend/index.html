@@ -78,8 +78,9 @@
     </main>
 
     <!-- ================= REGISTER PAGE ================= -->
-    <!-- FORM WRAPPER -->
-            <div id="formContainer">
+    <main id="registerPage" class="page">
+        <!-- FORM WRAPPER -->
+        <div id="formContainer">
                 <form id="profileForm">
                     <div class="form-progress-header">
                         <div class="form-progress-label">
@@ -519,6 +520,15 @@
                         </div>
                     </div>
                 </form>
+           </div>
+           
+           <div id="successContainer" class="hidden" style="display: none; text-align: center; padding: 100px 20px; background: var(--bg); border-radius: 20px; margin: 40px auto; max-width: 600px; box-shadow: var(--shadow);">
+               <div style="font-size: 4em; margin-bottom: 20px;">🎉</div>
+               <h2>Profile Submitted Successfully</h2>
+               <p style="margin: 20px 0; color: var(--text);">Your unique Profile ID is:</p>
+               <div id="displayId" style="font-size: 2em; font-weight: 700; color: var(--pink); background: var(--input-bg); padding: 15px 30px; border-radius: 12px; display: inline-block; margin-bottom: 30px;">MAT-XXXX</div>
+               <p style="margin-bottom: 30px; color: var(--muted);">Please save this ID and your PIN. You will need them to log in later.</p>
+               <button type="button" class="primary-btn" onclick="document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page')); document.getElementById('dashboardPage').classList.add('active-page'); syncDashboard(); document.getElementById('successContainer').style.display='none'; document.getElementById('formContainer').style.display='block';">Go to My Dashboard</button>
            </div>
     </main>
 
