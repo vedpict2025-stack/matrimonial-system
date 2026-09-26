@@ -327,17 +327,37 @@ form {
     border: 0;
     padding: 14px 22px;
     color: #fffaf2;
-    background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+    background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
     border-radius: 14px;
     font-weight: 600;
-    box-shadow: 0 10px 24px rgba(122, 35, 51, 0.22);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 24px rgba(122, 35, 51, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.primary-btn::after,
+.submit-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: skewX(-20deg);
+    transition: all 0.5s ease;
+}
+
+.primary-btn:hover::after,
+.submit-btn:hover::after {
+    left: 150%;
 }
 
 .primary-btn:hover,
 .submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(122, 35, 51, 0.28);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(122, 35, 51, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 .secondary-btn,
@@ -348,12 +368,15 @@ form {
     background: var(--surface);
     border-radius: 14px;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .secondary-btn:hover,
 .ghost-btn:hover {
     border-color: var(--gold);
     background: var(--gold-soft);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(196, 163, 90, 0.15);
 }
 
 .text-btn {
@@ -899,12 +922,29 @@ textarea {
     border-radius: 20px;
     overflow: hidden;
     box-shadow: var(--shadow);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: fadeInUp 0.6s ease backwards;
+}
+
+.profile-card:nth-child(even) {
+    animation-delay: 0.1s;
 }
 
 .profile-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(79, 21, 33, 0.12);
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 24px 48px rgba(79, 21, 33, 0.15);
+    border-color: var(--gold);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .profile-cover {
@@ -912,9 +952,19 @@ textarea {
     background-color: var(--maroon-soft);
     background-size: cover;
     background-position: center;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.profile-card-body { padding: 18px; }
+.profile-card:hover .profile-cover {
+    transform: scale(1.08);
+}
+
+.profile-card-body { 
+    padding: 22px; 
+    position: relative;
+    background: var(--surface);
+    z-index: 1;
+}
 
 .profile-name {
     font-size: 1.45rem;
@@ -1112,12 +1162,21 @@ th {
     display: grid;
     place-items: center;
     padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(42, 18, 22, 0.55);
+    background: rgba(18, 12, 14, 0.65);
+    backdrop-filter: blur(8px);
 }
 
 .modal-card {
@@ -1128,21 +1187,40 @@ th {
     overflow: auto;
     background: var(--surface);
     border-radius: 22px;
-    padding: 28px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+    padding: 32px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--border));
+}
+
+.modal:not(.hidden) .modal-card {
+    transform: scale(1) translateY(0);
+    opacity: 1;
 }
 
 .modal-close {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 16px;
+    right: 16px;
     width: 36px;
     height: 36px;
     border: 0;
     border-radius: 50%;
-    background: var(--soft);
-    color: var(--text);
+    background: var(--maroon-soft);
+    color: var(--maroon-dark);
     font-size: 22px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: grid;
+    place-items: center;
+}
+
+.modal-close:hover {
+    background: var(--maroon);
+    color: #fff;
+    transform: rotate(90deg);
 }
 
 .theme-menu-container {
