@@ -551,16 +551,18 @@ async function fetchAndRenderProfiles(reset = false) {
 
         if (reset) document.getElementById('profileCount').textContent = `Showing Matches`;
 
+        window.loadedProfiles = window.loadedProfiles || {};
         if (profiles.length === 0 && reset) {
             grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 30px;">No profiles match your criteria.</div>';
         } else {
             profiles.forEach(p => {
+                window.loadedProfiles[p.id] = p;
                 const visualId = "MAT-" + String(p.id).padStart(4, "0");
                 const imgSrc = p.photo_base64 || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlNWEwZTUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4='; // Fallback
                 
                 grid.innerHTML += `
                     <div class="profile-card">
-                        <div class="profile-cover" style="background-image: url('${imgSrc}'); background-size: cover; background-position: center;"></div>
+                        <div class="profile-cover" style="background-image: url('${imgSrc}'); background-size: cover; background-position: center; transition: transform 0.4s ease;"></div>
                         <div class="profile-card-body">
                             <span class="eyebrow">${visualId}</span>
                             <h3 style="margin-bottom: 5px; color: var(--text);">${p.name || 'Anonymous'}</h3>
@@ -569,7 +571,7 @@ async function fetchAndRenderProfiles(reset = false) {
                                 <strong>💼</strong> ${p.job || 'Not specified'}<br>
                                 <strong>🎓</strong> ${p.qualification || 'Not specified'}
                             </div>
-                            <button class="primary-btn" style="width: 100%; padding: 10px;">View Full Profile</button>
+                            <button class="primary-btn" onclick="openProfileModal('${p.id}')" style="width: 100%; padding: 10px;">View Full Profile</button>
                         </div>
                     </div>
                 `;
@@ -591,6 +593,147 @@ window.addEventListener('scroll', () => {
             fetchAndRenderProfiles(false);
         }
     }
+});
+
+/* =========================================
+   PROFILE MODAL & FULL DETAILS LOGIC
+========================================= */
+window.openProfileModal = function(id) {
+    const p = window.loadedProfiles[id];
+    if (!p) return;
+    
+    const visualId = "MAT-" + String(p.id).padStart(4, "0");
+    const imgSrc = p.photo_base64 || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlNWEwZTUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=';
+    
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
+        <div style="display: flex; gap: 28px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 280px;">
+                <img src="${imgSrc}" style="width: 100%; border-radius: 18px; object-fit: cover; box-shadow: var(--shadow);">
+                <div style="margin-top: 16px; text-align: center; color: var(--muted); font-size: 13px;">
+                    <p>Verified by Committee ✓</p>
+                </div>
+            </div>
+            <div style="flex: 1.5; min-width: 300px;">
+                <span class="eyebrow">${visualId}</span>
+                <h2 style="font-family: var(--font-display); font-size: 2.4rem; margin-bottom: 8px; color: var(--text);">${p.name || 'Anonymous'}</h2>
+                <p style="color: var(--muted); font-size: 15px; margin-bottom: 24px;">
+                    ${p.age ? p.age + ' yrs' : ''} ${p.height ? ' • ' + p.height : ''} ${p.city ? ' • ' + p.city : ''}
+                </p>
+                
+                <div id="quickInfo-${p.id}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Profession</span>
+                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.job || 'Not specified'}</strong>
+                        <small style="color: var(--muted);">${p.income || ''}</small>
+                    </div>
+                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Education</span>
+                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.qualification || 'Not specified'}</strong>
+                    </div>
+                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Religion & Caste</span>
+                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.religion || 'Any'} - ${p.caste || 'Any'}</strong>
+                    </div>
+                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Marital Status</span>
+                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.maritalStatus || 'Never Married'}</strong>
+                    </div>
+                </div>
+
+                <div id="fullDetails-${p.id}" style="display: none; margin-bottom: 28px; max-height: 350px; overflow-y: auto; padding-right: 8px;">
+                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">Personal Info</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
+                        <div><strong style="color: var(--muted);">Height:</strong> ${p.height || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Weight:</strong> ${p.weight ? p.weight + ' kg' : 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Location:</strong> ${p.city || 'N/A'}, ${p.state || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Physical Status:</strong> ${p.physicalStatus || 'Normal'}</div>
+                    </div>
+                    
+                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">Education & Career</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
+                        <div><strong style="color: var(--muted);">Education:</strong> ${p.qualification || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Profession:</strong> ${p.job || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Job Location:</strong> ${p.jobLocation || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Income:</strong> ${p.income || 'N/A'}</div>
+                    </div>
+
+                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">Background & Family</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
+                        <div><strong style="color: var(--muted);">Religion/Caste:</strong> ${p.religion || 'N/A'} - ${p.caste || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Sub-Religion:</strong> ${p.subReligion || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Diet:</strong> ${p.diet || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Lifestyle:</strong> ${p.lifestyle || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Family Type:</strong> ${p.familyType || 'N/A'}</div>
+                        <div><strong style="color: var(--muted);">Family Location:</strong> ${p.familyLocation || 'N/A'}</div>
+                    </div>
+
+                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">About & Expectations</h4>
+                    <div style="font-size: 13px; color: var(--text); line-height: 1.5;">
+                        <p style="margin-bottom: 8px;"><strong style="color: var(--muted);">About Me:</strong><br>${p.aboutMe || 'Not provided'}</p>
+                        <p><strong style="color: var(--muted);">Partner Expectations:</strong><br>${p.goals || 'Not provided'}</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <button class="primary-btn" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="this.innerHTML='Interest Sent ✓'; this.style.background='var(--teal)'; this.style.color='#fff';">Send Interest</button>
+                    <button class="secondary-btn" id="saveProfileBtn-${p.id}" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="toggleShortlist('${p.id}', this)">Save Profile</button>
+                    <button class="text-btn" style="width: 100%; margin-top: 8px; font-size: 14px; text-decoration: underline; color: var(--maroon);" onclick="toggleFullDetails('${p.id}', this)">View Full Details</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const savedProfiles = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
+    const saveBtn = document.getElementById(`saveProfileBtn-${p.id}`);
+    if (savedProfiles.includes(String(p.id))) {
+        saveBtn.innerHTML = 'Saved ★';
+        saveBtn.style.borderColor = 'var(--gold)';
+        saveBtn.style.color = 'var(--gold)';
+    }
+    
+    document.getElementById('profileModal').classList.remove('hidden');
+};
+
+window.toggleFullDetails = function(id, btnElement) {
+    const quickInfo = document.getElementById(`quickInfo-${id}`);
+    const fullDetails = document.getElementById(`fullDetails-${id}`);
+    
+    if (fullDetails.style.display === 'none') {
+        quickInfo.style.display = 'none';
+        fullDetails.style.display = 'block';
+        btnElement.textContent = 'Hide Full Details';
+    } else {
+        quickInfo.style.display = 'grid';
+        fullDetails.style.display = 'none';
+        btnElement.textContent = 'View Full Details';
+    }
+};
+
+window.toggleShortlist = function(id, btnElement) {
+    id = String(id);
+    let saved = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
+    if (saved.includes(id)) {
+        saved = saved.filter(s => s !== id);
+        btnElement.innerHTML = 'Save Profile';
+        btnElement.style.borderColor = '';
+        btnElement.style.color = '';
+    } else {
+        saved.push(id);
+        btnElement.innerHTML = 'Saved ★';
+        btnElement.style.borderColor = 'var(--gold)';
+        btnElement.style.color = 'var(--gold)';
+    }
+    localStorage.setItem('shortlistedProfiles', JSON.stringify(saved));
+    if (document.getElementById('dashboardPage').classList.contains('active-page')) {
+        syncDashboard();
+    }
+};
+
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.getElementById('profileModal').classList.add('hidden');
+    });
 });
 
 /* =========================================
@@ -621,6 +764,42 @@ async function syncDashboard() {
         }
     } catch (err) {
         console.error("Dashboard sync error", err);
+    }
+    
+    // Sync Shortlisted Profiles
+    const saved = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
+    const shortlistGrid = document.getElementById('shortlistGrid');
+    const shortlistCount = document.getElementById('shortlistCount');
+    if (shortlistCount) shortlistCount.textContent = saved.length;
+    
+    if (saved.length === 0) {
+        shortlistGrid.innerHTML = '<div class="empty-state">You haven\'t shortlisted any profiles yet.</div>';
+    } else {
+        shortlistGrid.innerHTML = '';
+        saved.forEach(id => {
+            const p = window.loadedProfiles ? window.loadedProfiles[id] : null;
+            if (p) {
+                const visualId = "MAT-" + String(p.id).padStart(4, "0");
+                const imgSrc = p.photo_base64 || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlNWEwZTUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=';
+                shortlistGrid.innerHTML += `
+                    <div class="profile-card" style="display: flex; gap: 12px; padding: 12px; cursor: pointer;" onclick="openProfileModal('${p.id}')">
+                        <img src="${imgSrc}" style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover;">
+                        <div>
+                            <span class="eyebrow">${visualId}</span>
+                            <h4 style="margin: 2px 0;">${p.name || 'Anonymous'}</h4>
+                            <p style="font-size: 12px; color: var(--muted);">${p.age ? p.age + ' yrs' : ''} • ${p.city || ''}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                shortlistGrid.innerHTML += `
+                    <div class="profile-card" style="padding: 12px;">
+                        <span class="eyebrow">MAT-${String(id).padStart(4, "0")}</span>
+                        <p style="font-size: 12px; color: var(--muted); margin-top: 4px;">Profile details unavailable. Please browse profiles to load data.</p>
+                    </div>
+                `;
+            }
+        });
     }
 }
 
