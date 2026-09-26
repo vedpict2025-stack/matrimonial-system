@@ -358,6 +358,7 @@ if (form) {
         const submitBtn = document.getElementById("submitBtn");
         const submitText = document.getElementById("submitText");
         
+        // Expanded profile object to capture all frontend fields
         const profile = {
             name: document.getElementById("name").value,
             dob: document.getElementById("dob").value,
@@ -376,14 +377,29 @@ if (form) {
             jobLocation: document.getElementById("jobLocation").value,
             income: document.getElementById("income").value,
             religion: document.getElementById("religion").value,
-            caste: document.getElementById("caste").value
+            subReligion: document.getElementById("subReligion")?.value || "",
+            caste: document.getElementById("caste").value,
+            fatherName: document.getElementById("fatherName")?.value || "",
+            motherName: document.getElementById("motherName")?.value || "",
+            brothers: document.getElementById("brothers")?.value || "",
+            sisters: document.getElementById("sisters")?.value || "",
+            familyType: document.getElementById("familyType")?.value || "",
+            familyLocation: document.getElementById("familyLocation")?.value || "",
+            aboutMe: document.getElementById("aboutMe")?.value || "",
+            goals: document.getElementById("goals")?.value || "",
+            diet: document.getElementById("diet")?.value || "",
+            lifestyle: document.getElementById("lifestyle")?.value || "",
+            partnerAgeMin: document.getElementById("partnerAgeMin")?.value || "",
+            partnerAgeMax: document.getElementById("partnerAgeMax")?.value || "",
+            partnerState: document.getElementById("partnerState")?.value || "",
+            partnerEducation: document.getElementById("partnerEducation")?.value || ""
         };
 
         submitBtn.disabled = true;
         submitText.textContent = "Saving Securely...";
 
         try {
-            const response = await fetch("https://matrimonial-api-0097.onrender.com/api/profiles", {
+            const response = await fetch("https://matrimonial-system.vercel.app/api/profiles", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(profile)
@@ -475,7 +491,7 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
     btn.disabled = true;
 
     try {
-        const res = await fetch('https://matrimonial-api-0097.onrender.com/api/login', {
+        const res = await fetch('https://matrimonial-system.vercel.app/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, pin })
@@ -533,7 +549,7 @@ async function fetchAndRenderProfiles(reset = false) {
     isFetching = true;
     
     try {
-        const res = await fetch(`https://matrimonial-api-0097.onrender.com/api/profiles?page=${currentPage}&limit=12`);
+        const res = await fetch(`https://matrimonial-system.vercel.app/api/profiles?page=${currentPage}&limit=12`);
         let profiles = await res.json();
         
         if (profiles.length < 12) hasMoreProfiles = false;
@@ -596,7 +612,7 @@ window.addEventListener('scroll', () => {
 });
 
 /* =========================================
-   PROFILE MODAL LOGIC
+   PROFILE MODAL LOGIC WITH FULL DETAILS TOGGLE
 ========================================= */
 window.openProfileModal = function(id) {
     const p = window.loadedProfiles[id];
@@ -614,13 +630,14 @@ window.openProfileModal = function(id) {
                     <p>Verified by Committee ✓</p>
                 </div>
             </div>
-            <div style="flex: 1.5; min-width: 300px;">
+            <div style="flex: 1.5; min-width: 300px; display: flex; flex-direction: column;">
                 <span class="eyebrow">${visualId}</span>
                 <h2 style="font-family: var(--font-display); font-size: 2.4rem; margin-bottom: 8px; color: var(--text);">${p.name || 'Anonymous'}</h2>
                 <p style="color: var(--muted); font-size: 15px; margin-bottom: 24px;">
                     ${p.age ? p.age + ' yrs' : ''} ${p.height ? ' • ' + p.height : ''} ${p.city ? ' • ' + p.city : ''}
                 </p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                     <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
                         <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Profession</span>
                         <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.job || 'Not specified'}</strong>
@@ -639,9 +656,50 @@ window.openProfileModal = function(id) {
                         <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.maritalStatus || 'Never Married'}</strong>
                     </div>
                 </div>
-                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
                     <button class="primary-btn" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="this.innerHTML='Interest Sent ✓'; this.style.background='var(--teal)'; this.style.color='#fff';">Send Interest</button>
                     <button class="secondary-btn" id="saveProfileBtn-${p.id}" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="toggleShortlist('${p.id}', this)">Save Profile</button>
+                </div>
+
+                <!-- EXPANDABLE FULL DETAILS FEATURE -->
+                <div style="border-top: 1px solid var(--border); padding-top: 20px; width: 100%;">
+                    <button onclick="const el = document.getElementById('fullDetails-${p.id}'); if(el.style.display === 'none'){ el.style.display = 'grid'; this.innerText = 'Hide Details ↑'; } else { el.style.display = 'none'; this.innerText = 'View Full Details ↓'; }" class="secondary-btn" style="width: 100%; text-align: center; padding: 12px 0; font-size: 1.05rem; margin-bottom: 16px; border-style: dashed;">View Full Details ↓</button>
+                    
+                    <div id="fullDetails-${p.id}" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; font-size: 14px; background: var(--input-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+                        
+                        <div style="grid-column: 1 / -1; margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;"><strong style="color:var(--maroon);">Basic & Physical Details</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Name</span><strong style="color:var(--text);">${p.name || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Gender</span><strong style="color:var(--text);">${p.gender || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Age & DOB</span><strong style="color:var(--text);">${p.age || '-'} yrs (${p.dob || '-'})</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Height & Weight</span><strong style="color:var(--text);">${p.height || '-'} / ${p.weight ? p.weight + ' kg' : '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Physical Status</span><strong style="color:var(--text);">${p.physicalStatus || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Current Location</span><strong style="color:var(--text);">${p.city || '-'}, ${p.state || '-'}</strong></div>
+                        
+                        <div style="grid-column: 1 / -1; margin-top: 8px; margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;"><strong style="color:var(--maroon);">Education & Career</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Qualification</span><strong style="color:var(--text);">${p.qualification || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Profession</span><strong style="color:var(--text);">${p.job || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Annual Income</span><strong style="color:var(--text);">${p.income || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Job Location</span><strong style="color:var(--text);">${p.jobLocation || '-'}</strong></div>
+
+                        <div style="grid-column: 1 / -1; margin-top: 8px; margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;"><strong style="color:var(--maroon);">Religion & Background</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Religion</span><strong style="color:var(--text);">${p.religion || '-'} ${p.subReligion ? '('+p.subReligion+')' : ''}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Caste</span><strong style="color:var(--text);">${p.caste || '-'}</strong></div>
+                        
+                        ${(p.familyType || p.fatherName || p.brothers) ? `
+                        <div style="grid-column: 1 / -1; margin-top: 8px; margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;"><strong style="color:var(--maroon);">Family Details</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Family Type</span><strong style="color:var(--text);">${p.familyType \vert{}\vert{} '-'} (${p.familyLocation || '-'})</strong></div>
+                        <div style="grid-column: 1 / -1;"><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Parents</span><strong style="color:var(--text);">Father: ${p.fatherName \vert{}\vert{} '-'} \vert{} Mother:${p.motherName || '-'}</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Siblings</span><strong style="color:var(--text);">${p.brothers \vert{}\vert{} '0'} Brother(s),${p.sisters || '0'} Sister(s)</strong></div>
+                        ` : ''}
+
+                        ${(p.aboutMe || p.goals || p.diet) ? `
+                        <div style="grid-column: 1 / -1; margin-top: 8px; margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;"><strong style="color:var(--maroon);">Lifestyle & Expectations</strong></div>
+                        <div><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Diet & Lifestyle</span><strong style="color:var(--text);">${p.diet \vert{}\vert{} '-'} \vert{}${p.lifestyle || '-'}</strong></div>
+                        <div style="grid-column: 1 / -1;"><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">About Me</span><strong style="color:var(--text); font-weight: 500; display:block; padding-top:4px;">${p.aboutMe || '-'}</strong></div>
+                        <div style="grid-column: 1 / -1;"><span style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; font-weight:700;">Partner Expectations</span><strong style="color:var(--text); font-weight: 500; display:block; padding-top:4px;">${p.goals || '-'}</strong></div>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         </div>
@@ -695,7 +753,7 @@ async function syncDashboard() {
     document.getElementById('dashName').textContent = "Loading...";
 
     try {
-        const res = await fetch(`https://matrimonial-api-0097.onrender.com/api/profiles/${savedId}`);
+        const res = await fetch(`https://matrimonial-system.vercel.app/api/profiles/${savedId}`);
         if (res.ok) {
             const data = await res.json();
             document.getElementById('dashName').textContent = data.name || "Anonymous User";
@@ -724,7 +782,6 @@ async function syncDashboard() {
         shortlistGrid.innerHTML = '<div class="empty-state">You haven\'t shortlisted any profiles yet.</div>';
     } else {
         shortlistGrid.innerHTML = '';
-        // In a real app we would fetch the specific profiles, but we can look in window.loadedProfiles or just show basic placeholders
         saved.forEach(id => {
             const p = window.loadedProfiles ? window.loadedProfiles[id] : null;
             if (p) {
