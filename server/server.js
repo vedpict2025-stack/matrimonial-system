@@ -3,17 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
-// --- DIAGNOSTIC LISTENERS (To catch the silent crashes) ---
+// --- DIAGNOSTIC LISTENERS ---
 process.on('uncaughtException', (err) => {
     console.error('🚨 UNCAUGHT EXCEPTION CRASH:', err);
 });
 process.on('unhandledRejection', (reason, promise) => {
     console.error('🚨 UNHANDLED PROMISE REJECTION:', reason);
 });
-process.on('exit', (code) => {
-    console.log(`🛑 Node process exited with code: ${code}`);
-});
-// ----------------------------------------------------------
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,21 +24,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 console.log("✅ Supabase client initialized!");
 
-// --- 1. CREATE PROFILE (Now includes PIN and Photo Data) ---
+// --- 1. CREATE PROFILE ---
 app.post('/api/profiles', async (req, res) => {
     try {
-        console.log("📥 Receiving new profile submission...");
         const { data, error } = await supabase.from('profiles').insert([req.body]).select();
         if (error) throw error;
-        console.log("✅ Profile saved successfully!");
         res.status(201).json({ profile: data[0] });
     } catch (err) {
-        console.error("🔥 ROUTE ERROR:", err);
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- 2. PAGINATED BROWSE PROFILES (Infinite Scroll) ---
+// --- 2. PAGINATED BROWSE PROFILES ---
 app.get('/api/profiles', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -59,23 +52,20 @@ app.get('/api/profiles', async (req, res) => {
         if (error) throw error;
         res.status(200).json(data);
     } catch (err) {
-        console.error("🔥 FETCH ERROR:", err);
         res.status(500).json({ error: "Could not fetch profiles." });
     }
 });
 
-// --- 3. SECURE LOGIN ROUTE (Validates ID and PIN) ---
+// --- 3. SECURE LOGIN ROUTE ---
 app.post('/api/login', async (req, res) => {
     try {
         const { id, pin } = req.body;
         
-        // Committee Master Login 
         if (id.startsWith('COM-')) {
             if (pin === '9999') return res.status(200).json({ success: true, role: 'admin' });
             else return res.status(401).json({ error: "Invalid Committee PIN." });
         }
 
-        // Regular User Login
         const dbId = parseInt(id.replace(/\D/g, ''), 10);
         const { data, error } = await supabase.from('profiles').select('id, pin').eq('id', dbId).single();
         
@@ -88,7 +78,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- 4. FETCH SINGLE PROFILE (For Dashboard) ---
+// --- 4. FETCH SINGLE PROFILE ---
 app.get('/api/profiles/:id', async (req, res) => {
     try {
         const dbId = parseInt(req.params.id.replace(/\D/g, ''), 10);
@@ -100,19 +90,16 @@ app.get('/api/profiles/:id', async (req, res) => {
     }
 });
 
-// --- ROBUST SERVER STARTUP ---
-const server = app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-    console.log(`⏳ Waiting for submissions... Do not close this window.`);
-});
+// --- VERCEL SERVERLESS STARTUP ---
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const server = app.listen(PORT, () => {
+        console.log(`🚀 Server running at http://localhost:${PORT}`);
+    });
 
-// Catch silent server errors (like a blocked port)
-server.on('error', (error) => {
-    console.error('💥 SERVER STARTUP ERROR:', error.message);
-});
+    server.on('error', (error) => {
+        console.error('💥 SERVER STARTUP ERROR:', error.message);
+    });
+}
 
-// Force the Node event loop to stay awake
-setInterval(() => {
-    // This silent heartbeat runs in the background and guarantees 
-    // the Node process cannot exit with "code: 0" on its own.
-}, 60000);
+// Export the Express app for Vercel
+module.exports = app;
