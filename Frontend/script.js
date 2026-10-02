@@ -22,6 +22,22 @@ document.addEventListener('mousedown', function (e) {
 });
 
 /* =========================================
+   API HELPER & CONFIG
+========================================= */
+const API_BASE = "https://matrimonial-api-0097.onrender.com"; // Production backend URL
+
+async function apiFetch(endpoint, options = {}) {
+    const savedId = localStorage.getItem("registeredProfileId") || "";
+    const headers = {
+        "Content-Type": "application/json",
+        "x-user-id": savedId,
+        ...(options.headers || {})
+    };
+    
+    return fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+}
+
+/* =========================================
    PAGE NAVIGATION LOGIC
 ========================================= */
 const navLinks = document.querySelectorAll('[data-page]');
@@ -320,7 +336,7 @@ if (cropConfirmBtn) {
 
         closeCropModal(false);
         if (typeof updateSectionProgress === "function") updateSectionProgress();
-        if (typeof saveDraftToLocalStorage === "function") saveDraftToLocalStorage();
+        if (typeof saveDraftToDatabase === "function") saveDraftToDatabase();
     });
 }
 
@@ -344,13 +360,85 @@ if (removePhotoBtn) {
         if (photoPreview) photoPreview.innerHTML = originalPhotoHTML;
         removePhotoBtn.style.display = "none";
         if (typeof updateSectionProgress === 'function') updateSectionProgress();
-        if (typeof saveDraftToLocalStorage === 'function') saveDraftToLocalStorage();
+        if (typeof saveDraftToDatabase === 'function') saveDraftToDatabase();
     });
 }
 
 /* =========================================
-   SECURE FORM SUBMISSION
+   SECURE FORM SUBMISSION & SAVE PROGRESS
 ========================================= */
+
+function collectProfileData(status = 'Draft') {
+    return {
+        name: document.getElementById("name").value,
+        dob: document.getElementById("dob").value,
+        age: document.getElementById("age").value,
+        pin: document.getElementById("pin").value,
+        photo_base64: finalPhotoBase64,
+        gender: document.getElementById("gender").value,
+        city: document.getElementById("city").value,
+        state: document.getElementById("state").value,
+        height: document.getElementById("height").value,
+        weight: document.getElementById("weight").value,
+        physicalStatus: document.getElementById("physicalStatus").value,
+        maritalStatus: document.getElementById("maritalStatus")?.value || "",
+        qualification: document.getElementById("qualification").value,
+        job: document.getElementById("job").value,
+        jobLocation: document.getElementById("jobLocation").value,
+        income: document.getElementById("income").value,
+        religion: document.getElementById("religion").value,
+        caste: document.getElementById("caste").value,
+        status: status
+    };
+}
+
+async function saveDraftToDatabase(showAlert = false) {
+    const profile = collectProfileData('Draft');
+    if (!profile.name || !profile.pin) {
+        if (showAlert) alert("Please enter at least your Name and PIN to save progress.");
+        return;
+    }
+    
+    try {
+        const savedId = localStorage.getItem("registeredProfileId");
+        let response;
+        if (savedId && !savedId.startsWith("COM-")) {
+            const dbId = parseInt(savedId.replace(/\D/g, ''), 10);
+            response = await apiFetch(`/api/profiles/${dbId}`, {
+                method: "PUT",
+                body: JSON.stringify(profile)
+            });
+        } else {
+            response = await apiFetch("/api/profiles", {
+                method: "POST",
+                body: JSON.stringify(profile)
+            });
+        }
+
+        const data = await response.json();
+        if (response.ok) {
+            const newId = "MAT-" + String(data.profile.id).padStart(4, "0");
+            localStorage.setItem("registeredProfileId", newId);
+            if (showAlert) alert("Progress saved successfully! Your Profile ID is " + newId + ". You can log in later with this ID and your PIN.");
+        } else {
+            if (showAlert) alert("Error saving draft: " + data.error);
+        }
+    } catch (error) {
+        console.error(error);
+        if (showAlert) alert("Could not connect to the server to save draft.");
+    }
+}
+
+const saveExitBtn = document.getElementById("saveExitBtn");
+if (saveExitBtn) {
+    saveExitBtn.addEventListener("click", () => {
+        saveDraftToDatabase(true).then(() => {
+            // Optional: redirect to login or dashboard
+            window.location.reload();
+        });
+    });
+}
+
 const form = document.getElementById("profileForm");
 if (form) {
     form.addEventListener("submit", async function (event) {
@@ -358,40 +446,30 @@ if (form) {
         const submitBtn = document.getElementById("submitBtn");
         const submitText = document.getElementById("submitText");
         
-        const profile = {
-            name: document.getElementById("name").value,
-            dob: document.getElementById("dob").value,
-            age: document.getElementById("age").value,
-            pin: document.getElementById("pin").value,
-            photo_base64: finalPhotoBase64,
-            gender: document.getElementById("gender").value,
-            city: document.getElementById("city").value,
-            state: document.getElementById("state").value,
-            height: document.getElementById("height").value,
-            weight: document.getElementById("weight").value,
-            physicalStatus: document.getElementById("physicalStatus").value,
-            maritalStatus: document.getElementById("maritalStatus")?.value || "",
-            qualification: document.getElementById("qualification").value,
-            job: document.getElementById("job").value,
-            jobLocation: document.getElementById("jobLocation").value,
-            income: document.getElementById("income").value,
-            religion: document.getElementById("religion").value,
-            caste: document.getElementById("caste").value
-        };
+        const profile = collectProfileData('Submitted');
 
         submitBtn.disabled = true;
         submitText.textContent = "Saving Securely...";
 
         try {
-            const response = await fetch("https://matrimonial-api-0097.onrender.com/api/profiles", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(profile)
-            });
+            const savedId = localStorage.getItem("registeredProfileId");
+            let response;
+            if (savedId && !savedId.startsWith("COM-")) {
+                const dbId = parseInt(savedId.replace(/\D/g, ''), 10);
+                response = await apiFetch(`/api/profiles/${dbId}`, {
+                    method: "PUT",
+                    body: JSON.stringify(profile)
+                });
+            } else {
+                response = await apiFetch("/api/profiles", {
+                    method: "POST",
+                    body: JSON.stringify(profile)
+                });
+            }
 
             const data = await response.json();
 
-         if (response.ok) {
+            if (response.ok) {
                 const newId = "MAT-" + String(data.profile.id).padStart(4, "0");
                 localStorage.setItem("registeredProfileId", newId);
                 
@@ -475,9 +553,8 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
     btn.disabled = true;
 
     try {
-        const res = await fetch('https://matrimonial-api-0097.onrender.com/api/login', {
+        const res = await apiFetch('/api/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, pin })
         });
         
@@ -485,11 +562,26 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
         
         if (res.ok) {
             localStorage.setItem("registeredProfileId", id);
+            localStorage.setItem("userRole", data.role);
             mainNavigation.style.display = 'flex';
             unlockApp(data.role);
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(data.role === 'admin' ? 'adminPage' : 'dashboardPage').classList.add('active-page');
-            syncDashboard();
+            
+            if (data.role === 'user' && data.status === 'Draft') {
+                // It's a draft, prompt to continue
+                const continueDraft = confirm("You have an unfinished profile. Would you like to continue filling it out?");
+                if (continueDraft) {
+                    document.getElementById('registerPage').classList.add('active-page');
+                    // We should also pre-fill the form with their data, but that's handled by fetch in a moment.
+                    populateFormFromDraft(id);
+                } else {
+                    document.getElementById('dashboardPage').classList.add('active-page');
+                    syncDashboard();
+                }
+            } else {
+                document.getElementById(data.role !== 'user' ? 'adminPage' : 'dashboardPage').classList.add('active-page');
+                syncDashboard();
+            }
         } else {
             alert(data.error);
         }
@@ -499,6 +591,46 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
     btn.textContent = "Secure Login";
     btn.disabled = false;
 });
+
+async function populateFormFromDraft(id) {
+    try {
+        const dbId = parseInt(id.replace(/\D/g, ''), 10);
+        const res = await apiFetch(`/api/profiles/${dbId}`);
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById("name").value = data.name || "";
+            document.getElementById("dob").value = data.dob || "";
+            document.getElementById("age").value = data.age || "";
+            document.getElementById("pin").value = data.pin || "";
+            if (data.photo_base64) {
+                finalPhotoBase64 = data.photo_base64;
+                const photoPreview = document.getElementById("photoPreview");
+                if (photoPreview) {
+                    photoPreview.innerHTML = `<img src="${finalPhotoBase64}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`;
+                }
+                const removePhotoBtn = document.getElementById("removePhoto");
+                if (removePhotoBtn) removePhotoBtn.style.display = "flex";
+            }
+            document.getElementById("gender").value = data.gender || "";
+            document.getElementById("city").value = data.city || "";
+            document.getElementById("state").value = data.state || "";
+            document.getElementById("height").value = data.height || "";
+            document.getElementById("weight").value = data.weight || "";
+            document.getElementById("physicalStatus").value = data.physicalStatus || "";
+            if(document.getElementById("maritalStatus")) document.getElementById("maritalStatus").value = data.maritalStatus || "";
+            document.getElementById("qualification").value = data.qualification || "";
+            document.getElementById("job").value = data.job || "";
+            document.getElementById("jobLocation").value = data.jobLocation || "";
+            document.getElementById("income").value = data.income || "";
+            document.getElementById("religion").value = data.religion || "";
+            document.getElementById("caste").value = data.caste || "";
+            
+            updateSectionProgress();
+        }
+    } catch (err) {
+        console.error("Failed to populate form", err);
+    }
+}
 
 document.getElementById('btnLogOut')?.addEventListener('click', () => {
     localStorage.removeItem("registeredProfileId");
@@ -533,8 +665,9 @@ async function fetchAndRenderProfiles(reset = false) {
     isFetching = true;
     
     try {
-        const res = await fetch(`https://matrimonial-api-0097.onrender.com/api/profiles?page=${currentPage}&limit=12`);
-        let profiles = await res.json();
+        const res = await apiFetch(`/api/profiles?page=${currentPage}&limit=12`);
+        let data = await res.json();
+        let profiles = data.profiles || data; // handle new structure
         
         if (profiles.length < 12) hasMoreProfiles = false;
 
@@ -579,6 +712,7 @@ async function fetchAndRenderProfiles(reset = false) {
         }
         currentPage++;
     } catch (err) {
+        console.error(err);
         if(reset) grid.innerHTML = '<div style="grid-column: 1/-1; color: var(--pink); text-align: center;">Error loading database. Make sure server is running.</div>';
     }
     isFetching = false;
@@ -747,18 +881,37 @@ async function syncDashboard() {
     document.getElementById('dashName').textContent = "Loading...";
 
     try {
-        const res = await fetch(`https://matrimonial-api-0097.onrender.com/api/profiles/${savedId}`);
+        const res = await apiFetch(`/api/profiles/${savedId}`);
         if (res.ok) {
             const data = await res.json();
             document.getElementById('dashName').textContent = data.name || "Anonymous User";
             
             const statusBadge = document.getElementById('dashStatus');
-            statusBadge.textContent = "Profile Active";
-            statusBadge.style.background = "#dcfce7";
-            statusBadge.style.color = "#166534";
+            statusBadge.textContent = "Profile " + (data.status || "Submitted");
+            if(data.status === 'Draft') {
+                statusBadge.style.background = "#fff3cd";
+                statusBadge.style.color = "#856404";
+            } else if(data.status === 'Approved') {
+                statusBadge.style.background = "#dcfce7";
+                statusBadge.style.color = "#166534";
+            } else {
+                statusBadge.style.background = "#e2e8f0";
+                statusBadge.style.color = "#334155";
+            }
             
-            document.getElementById('dashCompletion').textContent = "100%";
-            document.getElementById('dashBar').style.width = "100%";
+            // Completion percentage
+            let filledSections = 0;
+            const requiredFields = ['name', 'photo_base64', 'city', 'qualification', 'religion', 'height', 'goals', 'phone'];
+            requiredFields.forEach(f => {
+                if (data[f]) filledSections++;
+            });
+            const completionPercent = Math.round((filledSections / requiredFields.length) * 100);
+            
+            document.getElementById('dashCompletion').textContent = `${completionPercent}%`;
+            document.getElementById('dashBar').style.width = `${completionPercent}%`;
+            if (completionPercent < 100) {
+                 document.querySelector('.dashboard-actions').innerHTML = `<button class="primary-btn" type="button" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page')); populateFormFromDraft('${savedId}');">Complete Profile</button>`;
+            }
         } else {
             document.getElementById('dashName').textContent = "Profile Not Found";
         }
@@ -871,6 +1024,16 @@ function updateSectionProgress() {
             }
         }
     });
+
+    // Update global completion meter
+    const totalSections = document.querySelectorAll('#formNav li[data-target]').length - 1; // minus review
+    const completedSections = document.querySelectorAll('#formNav li.completed').length;
+    const percent = Math.round((completedSections / totalSections) * 100) || 0;
+    
+    const formCompletionPercent = document.getElementById('formCompletionPercent');
+    const formProgressBar = document.getElementById('formProgressBar');
+    if (formCompletionPercent) formCompletionPercent.textContent = percent + '%';
+    if (formProgressBar) formProgressBar.style.width = percent + '%';
 }
 
 // Trigger the progress check every time the user types, selects an option, or uploads a file
