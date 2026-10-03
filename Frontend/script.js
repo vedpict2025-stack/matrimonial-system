@@ -33,7 +33,7 @@ async function apiFetch(endpoint, options = {}) {
         "x-user-id": savedId,
         ...(options.headers || {})
     };
-    
+
     return fetch(`${API_BASE}${endpoint}`, { ...options, headers });
 }
 
@@ -47,11 +47,11 @@ navLinks.forEach(link => {
     link.addEventListener('click', () => {
         const targetPageId = link.getAttribute('data-page');
         const targetPage = document.getElementById(targetPageId);
-        
+
         if (targetPage) {
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
             pages.forEach(page => page.classList.remove('active-page'));
-            
+
             if (link.classList.contains('nav-link')) link.classList.add('active');
             targetPage.classList.add('active-page');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -79,7 +79,7 @@ function switchFormSection(targetId) {
     // Show target section and highlight sidebar item
     const targetSection = document.getElementById(targetId);
     const targetNav = document.querySelector(`[data-target="${targetId}"]`);
-    
+
     if (targetSection) targetSection.classList.add('active-section');
     if (targetNav) targetNav.classList.add('active');
 
@@ -87,12 +87,12 @@ function switchFormSection(targetId) {
     if (targetId === 'sec-review') {
         generateReviewSummary();
     }
-    
+
     // Check for completions
     if (typeof updateSectionProgress === 'function') {
         updateSectionProgress();
     }
-    
+
     // Scroll to top of the form area so the user sees the new section
     const formLayout = document.querySelector('.form-layout-split');
     if (formLayout) {
@@ -118,7 +118,7 @@ nextButtons.forEach(btn => {
 function generateReviewSummary() {
     const reviewContent = document.getElementById('reviewContent');
     if (!reviewContent) return;
-    
+
     // Key-Value map of input IDs, readable labels, and their parent sections
     const fieldsToReview = [
         { id: 'name', label: 'Full Name', section: 'sec-personal' },
@@ -139,12 +139,12 @@ function generateReviewSummary() {
     let html = '';
     fieldsToReview.forEach(field => {
         const inputElement = document.getElementById(field.id);
-        
+
         // If empty, create a clickable routing link instead of plain text
-        const value = (inputElement && inputElement.value.trim() !== "") 
-            ? inputElement.value 
+        const value = (inputElement && inputElement.value.trim() !== "")
+            ? inputElement.value
             : `<span style="color:var(--pink); font-size:0.9em; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="switchFormSection('${field.section}')">Add ${field.label} ✎</span>`;
-        
+
         html += `
             <div class="review-item">
                 <span class="review-label">${field.label}</span>
@@ -166,9 +166,9 @@ if (dobInput && ageInput) {
         let formatted = digits;
         if (digits.length > 4) formatted = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
         else if (digits.length > 2) formatted = digits.slice(0, 2) + "/" + digits.slice(2);
-        
+
         this.value = formatted;
-        
+
         const match = formatted.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
         if (match) {
             const birthDate = new Date(match[3], match[2] - 1, match[1]);
@@ -398,7 +398,7 @@ async function saveDraftToDatabase(showAlert = false) {
         if (showAlert) alert("Please enter at least your Name and PIN to save progress.");
         return;
     }
-    
+
     try {
         const savedId = localStorage.getItem("registeredProfileId");
         let response;
@@ -435,7 +435,7 @@ async function saveDraftToDatabase(showAlert = false) {
 
 function showToast(msg) {
     let toast = document.getElementById('toastMsg');
-    if(!toast) {
+    if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toastMsg';
         toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:var(--teal);color:#fff;padding:12px 24px;border-radius:8px;box-shadow:var(--shadow);z-index:9999;transition:opacity 0.3s;opacity:0;font-weight:600;';
@@ -462,7 +462,7 @@ if (form) {
         event.preventDefault();
         const submitBtn = document.getElementById("submitBtn");
         const submitText = document.getElementById("submitText");
-        
+
         const profile = collectProfileData('Submitted');
 
         submitBtn.disabled = true;
@@ -489,20 +489,20 @@ if (form) {
             if (response.ok) {
                 const newId = "MAT-" + String(data.profile.id).padStart(4, "0");
                 localStorage.setItem("registeredProfileId", newId);
-                
+
                 document.getElementById('formContainer').style.display = 'none';
-                
+
                 const successBox = document.getElementById('successContainer');
                 successBox.classList.remove('hidden');
                 successBox.style.display = 'block';
-                
+
                 document.getElementById('displayId').textContent = newId;
-                
+
                 unlockApp('user');
             } else {
                 alert("Error: " + data.error);
             }
-            
+
         } catch (error) {
             alert("Could not connect to the server.");
         }
@@ -520,14 +520,14 @@ const mainNavigation = document.getElementById('mainNavigation');
 function unlockApp(role) {
     document.querySelectorAll('.auth-only').forEach(link => link.style.display = 'none');
     document.getElementById('btnLogOut').style.display = 'inline-block';
-    
+
     const isAdmin = role === 'super_admin' || role === 'committee_admin' || role === 'committee_member';
-    
+
     if (isAdmin) {
         document.querySelector('[data-page="adminPage"]').style.display = 'inline-block';
         document.querySelector('[data-page="browsePage"]').style.display = 'inline-block';
         document.getElementById('navRegister').style.display = 'none';
-        
+
         // Specifically for adminPage: we could filter UI inside it if needed later
     } else {
         document.querySelector('[data-page="dashboardPage"]').style.display = 'inline-block';
@@ -540,11 +540,11 @@ function unlockApp(role) {
 document.addEventListener("DOMContentLoaded", () => {
     const savedId = localStorage.getItem("registeredProfileId");
     let role = localStorage.getItem("userRole");
-    if(!role) role = (savedId && savedId.startsWith("COM-")) ? 'committee_admin' : 'user';
-    
+    if (!role) role = (savedId && savedId.startsWith("COM-")) ? 'committee_admin' : 'user';
+
     if (savedId && authPage) {
         mainNavigation.style.display = 'flex';
-        unlockApp(role); 
+        unlockApp(role);
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
         document.getElementById(role !== 'user' ? 'adminPage' : 'dashboardPage').classList.add('active-page');
         if (role === 'user') {
@@ -575,7 +575,7 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
     const id = document.getElementById('loginProfileId').value.trim().toUpperCase();
     const pin = document.getElementById('loginPin').value.trim();
     const btn = document.getElementById('btnSubmitLogin');
-    
+
     if (!id || pin.length !== 4) return alert("Please enter a valid ID and 4-digit PIN.");
 
     btn.textContent = "Verifying...";
@@ -586,16 +586,16 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
             method: 'POST',
             body: JSON.stringify({ id, pin })
         });
-        
+
         const data = await res.json();
-        
+
         if (res.ok) {
             localStorage.setItem("registeredProfileId", id);
             localStorage.setItem("userRole", data.role);
             mainNavigation.style.display = 'flex';
             unlockApp(data.role);
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            
+
             if (data.role === 'user' && data.status === 'Draft') {
                 // It's a draft, prompt to continue
                 const continueDraft = confirm("You have an unfinished profile. Would you like to continue filling it out?");
@@ -646,14 +646,14 @@ async function populateFormFromDraft(id) {
             document.getElementById("height").value = data.height || "";
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("physicalStatus").value = data.physicalStatus || "";
-            if(document.getElementById("maritalStatus")) document.getElementById("maritalStatus").value = data.maritalStatus || "";
+            if (document.getElementById("maritalStatus")) document.getElementById("maritalStatus").value = data.maritalStatus || "";
             document.getElementById("qualification").value = data.qualification || "";
             document.getElementById("job").value = data.job || "";
             document.getElementById("jobLocation").value = data.jobLocation || "";
             document.getElementById("income").value = data.income || "";
             document.getElementById("religion").value = data.religion || "";
             document.getElementById("caste").value = data.caste || "";
-            
+
             updateSectionProgress();
         }
     } catch (err) {
@@ -681,8 +681,8 @@ let hasMoreProfiles = true;
 
 async function fetchAndRenderProfiles(reset = false) {
     const grid = document.getElementById('profileGrid');
-    if(!grid) return;
-    
+    if (!grid) return;
+
     if (reset) {
         currentPage = 1;
         hasMoreProfiles = true;
@@ -692,12 +692,12 @@ async function fetchAndRenderProfiles(reset = false) {
 
     if (!hasMoreProfiles || isFetching) return;
     isFetching = true;
-    
+
     try {
         const res = await apiFetch(`/api/profiles?page=${currentPage}&limit=12`);
         let data = await res.json();
         let profiles = data.profiles || data; // handle new structure
-        
+
         if (profiles.length < 12) hasMoreProfiles = false;
 
         const searchTxt = document.getElementById('profileSearch')?.value.toLowerCase() || "";
@@ -721,7 +721,7 @@ async function fetchAndRenderProfiles(reset = false) {
                 window.loadedProfiles[p.id] = p;
                 const visualId = "MAT-" + String(p.id).padStart(4, "0");
                 const imgSrc = p.photo_base64 || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlNWEwZTUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4='; // Fallback
-                
+
                 grid.innerHTML += `
                     <div class="profile-card">
                         <div class="profile-cover" style="background-image: url('${imgSrc}'); background-size: cover; background-position: center; transition: transform 0.4s ease;"></div>
@@ -742,7 +742,7 @@ async function fetchAndRenderProfiles(reset = false) {
         currentPage++;
     } catch (err) {
         console.error(err);
-        if(reset) grid.innerHTML = '<div style="grid-column: 1/-1; color: var(--pink); text-align: center;">Error loading database. Make sure server is running.</div>';
+        if (reset) grid.innerHTML = '<div style="grid-column: 1/-1; color: var(--pink); text-align: center;">Error loading database. Make sure server is running.</div>';
     }
     isFetching = false;
 }
@@ -761,13 +761,13 @@ window.addEventListener('scroll', () => {
 /* =========================================
    PROFILE MODAL & FULL DETAILS LOGIC
 ========================================= */
-window.openProfileModal = function(id) {
+window.openProfileModal = function (id) {
     const p = window.loadedProfiles[id];
     if (!p) return;
-    
+
     const visualId = "MAT-" + String(p.id).padStart(4, "0");
     const imgSrc = p.photo_base64 || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlNWEwZTUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=';
-    
+
     // Check authorization to view private details (phone, email, exact address)
     const viewerIdStr = localStorage.getItem("registeredProfileId") || "";
     const viewerId = parseInt(viewerIdStr.replace(/\\D/g, ''), 10);
@@ -937,7 +937,7 @@ window.openProfileModal = function(id) {
             </div>
         </div>
     `;
-    
+
     const savedProfiles = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
     const saveBtn = document.getElementById(`saveProfileBtn-${p.id}`);
     if (saveBtn && savedProfiles.includes(String(p.id))) {
@@ -945,15 +945,15 @@ window.openProfileModal = function(id) {
         saveBtn.style.borderColor = 'var(--gold)';
         saveBtn.style.color = 'var(--gold)';
     }
-    
+
     document.getElementById('profileModal').classList.remove('hidden');
 };
 
-window.toggleFullDetails = function(id) {
+window.toggleFullDetails = function (id) {
     const quickInfo = document.getElementById(`quickInfo-${id}`);
     const fullDetails = document.getElementById(`fullDetails-${id}`);
     const btnElement = document.getElementById(`toggleDetailsBtn-${id}`);
-    
+
     if (fullDetails.style.display === 'none') {
         quickInfo.style.display = 'none';
         fullDetails.style.display = 'block';
@@ -965,7 +965,7 @@ window.toggleFullDetails = function(id) {
     }
 };
 
-window.toggleShortlist = function(id, btnElement) {
+window.toggleShortlist = function (id, btnElement) {
     id = String(id);
     let saved = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
     if (saved.includes(id)) {
@@ -1006,20 +1006,20 @@ async function syncDashboard() {
         if (res.ok) {
             const data = await res.json();
             document.getElementById('dashName').textContent = data.name || "Anonymous User";
-            
+
             const statusBadge = document.getElementById('dashStatus');
             statusBadge.textContent = "Profile " + (data.status || "Submitted");
-            if(data.status === 'Draft') {
+            if (data.status === 'Draft') {
                 statusBadge.style.background = "#fff3cd";
                 statusBadge.style.color = "#856404";
-            } else if(data.status === 'Approved') {
+            } else if (data.status === 'Approved') {
                 statusBadge.style.background = "#dcfce7";
                 statusBadge.style.color = "#166534";
             } else {
                 statusBadge.style.background = "#e2e8f0";
                 statusBadge.style.color = "#334155";
             }
-            
+
             // Completion percentage
             let filledSections = 0;
             const requiredFields = ['name', 'photo_base64', 'city', 'qualification', 'religion', 'height', 'goals', 'phone'];
@@ -1027,19 +1027,19 @@ async function syncDashboard() {
                 if (data[f]) filledSections++;
             });
             const completionPercent = Math.round((filledSections / requiredFields.length) * 100);
-            
+
             document.getElementById('dashCompletion').textContent = `${completionPercent}%`;
             document.getElementById('dashBar').style.width = `${completionPercent}%`;
-            
+
             let actionHtml = `<button class="secondary-btn" type="button" data-page="registerPage" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page'));">Edit Profile</button>
                               <button class="primary-btn" type="button" onclick="openProfileModal('${savedId}')">View My Profile</button>`;
-            
+
             if (completionPercent < 100) {
-                 actionHtml = `<button class="primary-btn" type="button" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page')); populateFormFromDraft('${savedId}');">Complete Profile</button>
+                actionHtml = `<button class="primary-btn" type="button" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page')); populateFormFromDraft('${savedId}');">Complete Profile</button>
                                <button class="secondary-btn" type="button" onclick="openProfileModal('${savedId}')">View Partial Profile</button>`;
             }
             document.querySelector('.dashboard-actions').innerHTML = actionHtml;
-            
+
             window.loadedProfiles = window.loadedProfiles || {};
             window.loadedProfiles[savedId] = data;
         } else {
@@ -1048,13 +1048,13 @@ async function syncDashboard() {
     } catch (err) {
         console.error("Dashboard sync error", err);
     }
-    
+
     // Sync Shortlisted Profiles
     const saved = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
     const shortlistGrid = document.getElementById('shortlistGrid');
     const shortlistCount = document.getElementById('shortlistCount');
     if (shortlistCount) shortlistCount.textContent = saved.length;
-    
+
     if (saved.length === 0) {
         shortlistGrid.innerHTML = '<div class="empty-state">You haven\'t shortlisted any profiles yet.</div>';
     } else {
@@ -1121,7 +1121,7 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 function updateSectionProgress() {
     const formSectionsForProgress = document.querySelectorAll('.form-section');
     let missingLabels = [];
-    
+
     formSectionsForProgress.forEach(sec => {
         if (sec.id === 'sec-review') return; // Skip the review tab itself
 
@@ -1141,7 +1141,7 @@ function updateSectionProgress() {
             if (sec.id === 'sec-photo') {
                 isComplete = (typeof finalPhotoBase64 !== 'undefined' && finalPhotoBase64 !== null);
             } else {
-                isComplete = true; 
+                isComplete = true;
             }
         }
 
@@ -1161,14 +1161,14 @@ function updateSectionProgress() {
     const totalSections = document.querySelectorAll('#formNav li[data-target]').length - 1; // minus review
     const completedSections = document.querySelectorAll('#formNav li.completed').length;
     const percent = Math.round((completedSections / totalSections) * 100) || 0;
-    
+
     const formCompletionPercent = document.getElementById('formCompletionPercent');
     const formProgressBar = document.getElementById('formProgressBar');
     const formMissingText = document.getElementById('formMissingText');
-    
+
     if (formCompletionPercent) formCompletionPercent.textContent = percent + '%';
     if (formProgressBar) formProgressBar.style.width = percent + '%';
-    
+
     if (formMissingText) {
         if (missingLabels.length > 0) {
             formMissingText.innerHTML = `Missing: <span style="color:var(--maroon);">${missingLabels.slice(0, 2).join(', ')}${missingLabels.length > 2 ? '...' : ''}</span>`;
@@ -1194,26 +1194,26 @@ async function syncAdminDashboard() {
         if (res.ok) {
             let data = await res.json();
             let profiles = data.profiles || data;
-            
+
             const tbody = document.getElementById('adminTableBody');
-            if(!tbody) return;
-            
+            if (!tbody) return;
+
             let html = '';
             let approved = 0, pending = 0, draft = 0;
-            
+
             window.loadedProfiles = window.loadedProfiles || {};
-            
+
             profiles.forEach(p => {
                 window.loadedProfiles[p.id] = p;
-                if(p.status === 'Approved') approved++;
-                if(p.status === 'Submitted') pending++;
-                if(p.status === 'Draft') draft++;
-                
+                if (p.status === 'Approved') approved++;
+                if (p.status === 'Submitted') pending++;
+                if (p.status === 'Draft') draft++;
+
                 const visualId = "MAT-" + String(p.id).padStart(4, "0");
                 const role = localStorage.getItem("userRole");
-                
+
                 let actions = `<button class="text-btn" onclick="openProfileModal('${p.id}')">View</button>`;
-                
+
                 // Only super admin or committee admin can approve/reject, unless member is given access
                 if (role === 'super_admin' || role === 'committee_admin') {
                     if (p.status === 'Submitted' || p.status === 'Needs Correction') {
@@ -1223,13 +1223,13 @@ async function syncAdminDashboard() {
                         actions += ` | <button class="text-btn" style="color:var(--maroon);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Revoke</button>`;
                     }
                 }
-                
+
                 let badgeClass = 'status-badge ';
-                if(p.status === 'Draft') badgeClass += 'pending';
-                else if(p.status === 'Approved') badgeClass += 'approved';
-                else if(p.status === 'Needs Correction') badgeClass += 'correction';
+                if (p.status === 'Draft') badgeClass += 'pending';
+                else if (p.status === 'Approved') badgeClass += 'approved';
+                else if (p.status === 'Needs Correction') badgeClass += 'correction';
                 else badgeClass += 'pending'; // yellow
-                
+
                 html += `
                     <tr>
                         <td>${visualId}</td>
@@ -1241,9 +1241,9 @@ async function syncAdminDashboard() {
                     </tr>
                 `;
             });
-            
+
             tbody.innerHTML = html;
-            
+
             document.getElementById('adminTotal').textContent = profiles.length;
             document.getElementById('adminPending').textContent = pending;
             document.getElementById('adminApproved').textContent = approved;
@@ -1256,9 +1256,9 @@ async function syncAdminDashboard() {
 
 document.getElementById('refreshAdmin')?.addEventListener('click', syncAdminDashboard);
 
-window.changeProfileStatus = async function(id, newStatus) {
-    if (!confirm(`Are you sure you want to change profile MAT-${String(id).padStart(4,'0')} to ${newStatus}?`)) return;
-    
+window.changeProfileStatus = async function (id, newStatus) {
+    if (!confirm(`Are you sure you want to change profile MAT-${String(id).padStart(4, '0')} to ${newStatus}?`)) return;
+
     try {
         const res = await apiFetch(`/api/profiles/${id}`, {
             method: 'PUT',
@@ -1307,14 +1307,14 @@ const cityStateMap = {
 };
 
 if (cityInput && stateSelect) {
-    cityInput.addEventListener('input', function() {
+    cityInput.addEventListener('input', function () {
         // Convert typed text to lowercase and remove extra spaces
         const typedCity = this.value.trim().toLowerCase();
-        
+
         // If the typed city exists in our map, auto-select the state
         if (cityStateMap[typedCity]) {
             stateSelect.value = cityStateMap[typedCity];
-            
+
             // Force the progress checker to run so the pink checkmark updates instantly
             if (typeof updateSectionProgress === 'function') {
                 updateSectionProgress();
