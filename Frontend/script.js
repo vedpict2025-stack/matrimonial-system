@@ -1203,7 +1203,7 @@ if (profileFormElement) {
 ========================================= */
 async function syncAdminDashboard() {
     try {
-        const res = await apiFetch(`/api/profiles?page=1&limit=1000`);
+        const res = await apiFetch(`/api/profiles?page=1&limit=1000&admin=true`);
         if (res.ok) {
             let data = await res.json();
             let profiles = data.profiles || data;
@@ -1213,6 +1213,9 @@ async function syncAdminDashboard() {
 
             let html = '';
             let approved = 0, pending = 0, draft = 0;
+            
+            const activeTab = document.querySelector('.admin-tab.active');
+            const activeStatus = activeTab ? activeTab.getAttribute('data-tab-status') : 'Submitted';
 
             window.loadedProfiles = window.loadedProfiles || {};
 
@@ -1221,6 +1224,10 @@ async function syncAdminDashboard() {
                 if (p.status === 'Approved') approved++;
                 if (p.status === 'Submitted') pending++;
                 if (p.status === 'Draft') draft++;
+
+                // Only render if it matches the active tab status
+                if (p.status !== activeStatus && (activeStatus === 'Submitted' && p.status !== 'Submitted')) return;
+                if (p.status !== activeStatus) return;
 
                 const visualId = "MAT-" + String(p.id).padStart(4, "0");
                 const role = localStorage.getItem("userRole");
@@ -1255,7 +1262,7 @@ async function syncAdminDashboard() {
                 `;
             });
 
-            tbody.innerHTML = html;
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 20px;">No profiles found in this section.</td></tr>';
 
             document.getElementById('adminTotal').textContent = profiles.length;
             document.getElementById('adminPending').textContent = pending;
@@ -1335,3 +1342,15 @@ if (cityInput && stateSelect) {
         }
     });
 }
+document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => {
+            t.classList.remove('active');
+            t.style.color = 'var(--text)';
+        });
+        tab.classList.add('active');
+        tab.style.color = 'var(--pink)';
+        syncAdminDashboard();
+    });
+});
+

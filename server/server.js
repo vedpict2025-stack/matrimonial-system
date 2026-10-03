@@ -101,14 +101,15 @@ app.get('/api/profiles', async (req, res) => {
         const limit = parseInt(req.query.limit) || 12;
         const start = (page - 1) * limit;
         const end = start + limit - 1;
-
         let query = supabase.from('profiles').select('*');
         
-        // Access control
-        if (req.userRole === 'user' || !req.userRole) {
+        // Access control: Only admins passing admin=true can see non-approved profiles
+        if (req.query.admin === 'true' && (req.userRole === 'super_admin' || req.userRole === 'committee_admin' || req.userRole === 'committee_member')) {
+            if (req.query.status && req.query.status !== 'All') {
+                query = query.eq('status', req.query.status);
+            }
+        } else {
             query = query.eq('status', 'Approved');
-        } else if (req.query.status) {
-            query = query.eq('status', req.query.status);
         }
 
         const { data, error } = await query
