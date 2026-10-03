@@ -24,7 +24,7 @@ document.addEventListener('mousedown', function (e) {
 /* =========================================
    API HELPER & CONFIG
 ========================================= */
-const API_BASE = "https://matrimonial-api-0097.onrender.com"; // Production backend URL
+const API_BASE = "http://localhost:5000"; // Local testing backend URL
 
 async function apiFetch(endpoint, options = {}) {
     const savedId = localStorage.getItem("registeredProfileId") || "";
@@ -419,7 +419,11 @@ async function saveDraftToDatabase(showAlert = false) {
         if (response.ok) {
             const newId = "MAT-" + String(data.profile.id).padStart(4, "0");
             localStorage.setItem("registeredProfileId", newId);
-            if (showAlert) alert("Progress saved successfully! Your Profile ID is " + newId + ". You can log in later with this ID and your PIN.");
+            if (showAlert) {
+                alert("Progress saved successfully! Your Profile ID is " + newId + ". You can log in later with this ID and your PIN.");
+            } else {
+                showToast("✓ Saved just now");
+            }
         } else {
             if (showAlert) alert("Error saving draft: " + data.error);
         }
@@ -427,6 +431,19 @@ async function saveDraftToDatabase(showAlert = false) {
         console.error(error);
         if (showAlert) alert("Could not connect to the server to save draft.");
     }
+}
+
+function showToast(msg) {
+    let toast = document.getElementById('toastMsg');
+    if(!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastMsg';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:var(--teal);color:#fff;padding:12px 24px;border-radius:8px;box-shadow:var(--shadow);z-index:9999;transition:opacity 0.3s;opacity:0;font-weight:600;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 3000);
 }
 
 const saveExitBtn = document.getElementById("saveExitBtn");
@@ -502,14 +519,19 @@ const mainNavigation = document.getElementById('mainNavigation');
 
 function unlockApp(role) {
     document.querySelectorAll('.auth-only').forEach(link => link.style.display = 'none');
-    document.querySelector('[data-page="browsePage"]').style.display = 'inline-block';
     document.getElementById('btnLogOut').style.display = 'inline-block';
     
-    if (role === 'admin') {
+    const isAdmin = role === 'super_admin' || role === 'committee_admin' || role === 'committee_member';
+    
+    if (isAdmin) {
         document.querySelector('[data-page="adminPage"]').style.display = 'inline-block';
+        document.querySelector('[data-page="browsePage"]').style.display = 'inline-block';
         document.getElementById('navRegister').style.display = 'none';
+        
+        // Specifically for adminPage: we could filter UI inside it if needed later
     } else {
         document.querySelector('[data-page="dashboardPage"]').style.display = 'inline-block';
+        document.querySelector('[data-page="browsePage"]').style.display = 'inline-block';
         document.getElementById('navRegister').style.display = 'inline-block';
         document.getElementById('navRegister').textContent = 'Edit Profile';
     }
@@ -517,12 +539,19 @@ function unlockApp(role) {
 
 document.addEventListener("DOMContentLoaded", () => {
     const savedId = localStorage.getItem("registeredProfileId");
+    let role = localStorage.getItem("userRole");
+    if(!role) role = (savedId && savedId.startsWith("COM-")) ? 'committee_admin' : 'user';
+    
     if (savedId && authPage) {
         mainNavigation.style.display = 'flex';
-        unlockApp(savedId.startsWith("COM-") ? 'admin' : 'user'); 
+        unlockApp(role); 
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-        document.getElementById(savedId.startsWith("COM-") ? 'adminPage' : 'dashboardPage').classList.add('active-page');
-        syncDashboard();
+        document.getElementById(role !== 'user' ? 'adminPage' : 'dashboardPage').classList.add('active-page');
+        if (role === 'user') {
+            syncDashboard();
+        } else {
+            syncAdminDashboard();
+        }
     }
 });
 
@@ -572,7 +601,6 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
                 const continueDraft = confirm("You have an unfinished profile. Would you like to continue filling it out?");
                 if (continueDraft) {
                     document.getElementById('registerPage').classList.add('active-page');
-                    // We should also pre-fill the form with their data, but that's handled by fetch in a moment.
                     populateFormFromDraft(id);
                 } else {
                     document.getElementById('dashboardPage').classList.add('active-page');
@@ -580,7 +608,8 @@ document.getElementById('btnSubmitLogin')?.addEventListener('click', async () =>
                 }
             } else {
                 document.getElementById(data.role !== 'user' ? 'adminPage' : 'dashboardPage').classList.add('active-page');
-                syncDashboard();
+                if (data.role === 'user') syncDashboard();
+                else syncAdminDashboard();
             }
         } else {
             alert(data.error);
@@ -704,7 +733,7 @@ async function fetchAndRenderProfiles(reset = false) {
                                 <strong>💼</strong> ${p.job || 'Not specified'}<br>
                                 <strong>🎓</strong> ${p.qualification || 'Not specified'}
                             </div>
-                            <button class="primary-btn" onclick="openProfileModal('${p.id}')" style="width: 100%; padding: 10px;">View Full Profile</button>
+                            <button class="primary-btn" onclick="openProfileModal('${p.id}')" style="width: 100%; padding: 10px;">View  Profile</button>
                         </div>
                     </div>
                 `;
@@ -739,89 +768,180 @@ window.openProfileModal = function(id) {
     const visualId = "MAT-" + String(p.id).padStart(4, "0");
     const imgSrc = p.photo_base64 || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlNWEwZTUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=';
     
+    // Check authorization to view private details (phone, email, exact address)
+    const viewerIdStr = localStorage.getItem("registeredProfileId") || "";
+    const viewerId = parseInt(viewerIdStr.replace(/\\D/g, ''), 10);
+    const viewerRole = localStorage.getItem("userRole");
+    const isAdmin = viewerRole === 'super_admin' || viewerRole === 'committee_admin' || viewerRole === 'committee_member';
+    const isOwner = (viewerId === p.id);
+    const canViewPrivate = isAdmin || isOwner;
+
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
-        <div style="display: flex; gap: 28px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 280px;">
-                <img src="${imgSrc}" style="width: 100%; border-radius: 18px; object-fit: cover; box-shadow: var(--shadow);">
-                <div style="margin-top: 16px; text-align: center; color: var(--muted); font-size: 13px;">
-                    <p>Verified by Committee ✓</p>
+        <div class="print-container" style="max-width: 800px; margin: 0 auto; background: var(--surface); color: var(--text);">
+            
+            <!-- Quick View Header -->
+            <div id="quickHeader-${p.id}" style="display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <img src="${imgSrc}" style="width: 100%; border-radius: 18px; object-fit: cover; box-shadow: var(--shadow);">
+                </div>
+                <div style="flex: 1.5; min-width: 280px; display: flex; flex-direction: column; justify-content: center;">
+                    <span class="eyebrow">${visualId}</span>
+                    <h2 style="font-family: var(--font-display); font-size: 2.4rem; margin-bottom: 8px; color: var(--text);">${p.name || 'Anonymous'}</h2>
+                    <p style="color: var(--muted); font-size: 15px; margin-bottom: 24px;">
+                        ${p.age ? p.age + ' yrs' : ''} ${p.height ? ' • ' + p.height : ''} ${p.city ? ' • ' + p.city : ''}
+                    </p>
+                    <div style="color: var(--teal); font-size: 13px; font-weight: 600;">
+                        ✓ Verified by Committee
+                    </div>
                 </div>
             </div>
-            <div style="flex: 1.5; min-width: 300px;">
-                <span class="eyebrow">${visualId}</span>
-                <h2 style="font-family: var(--font-display); font-size: 2.4rem; margin-bottom: 8px; color: var(--text);">${p.name || 'Anonymous'}</h2>
-                <p style="color: var(--muted); font-size: 15px; margin-bottom: 24px;">
-                    ${p.age ? p.age + ' yrs' : ''} ${p.height ? ' • ' + p.height : ''} ${p.city ? ' • ' + p.city : ''}
-                </p>
+
+            <!-- Quick Info Grid -->
+            <div id="quickInfo-${p.id}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+                <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                    <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Profession</span>
+                    <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.job || 'Not specified'}</strong>
+                    <small style="color: var(--muted);">${p.income || ''}</small>
+                </div>
+                <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                    <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Education</span>
+                    <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.qualification || 'Not specified'}</strong>
+                </div>
+                <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                    <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Religion & Caste</span>
+                    <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.religion || 'Any'} - ${p.caste || 'Any'}</strong>
+                </div>
+                <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
+                    <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Marital Status</span>
+                    <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.maritalStatus || 'Never Married'}</strong>
+                </div>
+            </div>
+
+            <!-- Formal Details Table Layout (Hidden by Default) -->
+            <div id="fullDetails-${p.id}" style="display: none; background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 28px; max-height: 60vh; overflow-y: auto;">
                 
-                <div id="quickInfo-${p.id}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
-                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
-                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Profession</span>
-                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.job || 'Not specified'}</strong>
-                        <small style="color: var(--muted);">${p.income || ''}</small>
+                <div class="print-only-header" style="display: none; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; justify-content: space-between; align-items: flex-start;">
+                    <div style="text-align: left;">
+                        <h2 style="font-family: Arial, sans-serif; font-size: 1.8rem; margin: 0; color: #333; text-transform: uppercase;">Matrimonial Profile</h2>
+                        <p style="margin: 5px 0 0; font-size: 14px; color: #555;">Profile ID: <strong>${visualId}</strong></p>
+                        <p style="margin: 5px 0 0; font-size: 14px; color: #555;">Status: <strong>${p.status || 'Draft'}</strong></p>
                     </div>
-                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
-                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Education</span>
-                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.qualification || 'Not specified'}</strong>
-                    </div>
-                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
-                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Religion & Caste</span>
-                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.religion || 'Any'} - ${p.caste || 'Any'}</strong>
-                    </div>
-                    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border);">
-                        <span style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Marital Status</span>
-                        <strong style="display: block; font-size: 1.15rem; color: var(--maroon); margin-top: 4px;">${p.maritalStatus || 'Never Married'}</strong>
+                    <div>
+                        <img src="${imgSrc}" style="width: 120px; height: 140px; object-fit: cover; border: 1px solid #ccc; padding: 4px; background: #fff;">
                     </div>
                 </div>
 
-                <div id="fullDetails-${p.id}" style="display: none; margin-bottom: 28px; max-height: 350px; overflow-y: auto; padding-right: 8px;">
-                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">Personal Info</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
-                        <div><strong style="color: var(--muted);">Height:</strong> ${p.height || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Weight:</strong> ${p.weight ? p.weight + ' kg' : 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Location:</strong> ${p.city || 'N/A'}, ${p.state || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Physical Status:</strong> ${p.physicalStatus || 'Normal'}</div>
-                    </div>
-                    
-                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">Education & Career</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
-                        <div><strong style="color: var(--muted);">Education:</strong> ${p.qualification || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Profession:</strong> ${p.job || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Job Location:</strong> ${p.jobLocation || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Income:</strong> ${p.income || 'N/A'}</div>
-                    </div>
+                <div class="print-section">
+                    <h3 style="background: #f0f0f0; padding: 8px 12px; margin-bottom: 12px; font-size: 16px; border-left: 4px solid var(--maroon); color: #333;">1. Personal Information</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; color: #000;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 25%; background: #fafafa;">Full Name</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; width: 25%;">${p.name || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 25%; background: #fafafa;">Date of Birth / Age</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; width: 25%;">${p.dob || '-'} (${p.age ? p.age + ' yrs' : '-'})</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Gender</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.gender || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Marital Status</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.maritalStatus || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Height / Weight</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.height || '-'} / ${p.weight ? p.weight + ' kg' : '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Physical Status</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.physicalStatus || 'Normal'}</td>
+                        </tr>
+                    </table>
+                </div>
 
-                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">Background & Family</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
-                        <div><strong style="color: var(--muted);">Religion/Caste:</strong> ${p.religion || 'N/A'} - ${p.caste || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Sub-Religion:</strong> ${p.subReligion || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Diet:</strong> ${p.diet || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Lifestyle:</strong> ${p.lifestyle || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Family Type:</strong> ${p.familyType || 'N/A'}</div>
-                        <div><strong style="color: var(--muted);">Family Location:</strong> ${p.familyLocation || 'N/A'}</div>
-                    </div>
+                <div class="print-section">
+                    <h3 style="background: #f0f0f0; padding: 8px 12px; margin-bottom: 12px; font-size: 16px; border-left: 4px solid var(--maroon); color: #333;">2. Religion & Background</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; color: #000;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 25%; background: #fafafa;">Religion</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; width: 25%;">${p.religion || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 25%; background: #fafafa;">Caste</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; width: 25%;">${p.caste || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Sub-Religion</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.subReligion || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Diet</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.diet || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Family Type</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.familyType || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Lifestyle</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.lifestyle || '-'}</td>
+                        </tr>
+                    </table>
+                </div>
 
-                    <h4 style="color: var(--maroon); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">About & Expectations</h4>
-                    <div style="font-size: 13px; color: var(--text); line-height: 1.5;">
-                        <p style="margin-bottom: 8px;"><strong style="color: var(--muted);">About Me:</strong><br>${p.aboutMe || 'Not provided'}</p>
-                        <p><strong style="color: var(--muted);">Partner Expectations:</strong><br>${p.goals || 'Not provided'}</p>
+                <div class="print-section">
+                    <h3 style="background: #f0f0f0; padding: 8px 12px; margin-bottom: 12px; font-size: 16px; border-left: 4px solid var(--maroon); color: #333;">3. Education & Profession</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; color: #000;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 25%; background: #fafafa;">Highest Qualification</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; width: 75%;" colspan="3">${p.qualification || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Profession</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${p.job || '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Annual Income</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${canViewPrivate ? (p.income || '-') : 'Visible to matches'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Job Location</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;" colspan="3">${p.jobLocation || '-'}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="print-section">
+                    <h3 style="background: #f0f0f0; padding: 8px 12px; margin-bottom: 12px; font-size: 16px; border-left: 4px solid var(--maroon); color: #333;">4. Location & Contact Details</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; color: #000;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 25%; background: #fafafa;">City, State</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; width: 75%;" colspan="3">${p.city || '-'}, ${p.state || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #fafafa;">Mobile Number</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;" colspan="3">
+                                ${canViewPrivate ? (p.phone || 'Not provided') : '<span style="color:#888;"><i>Hidden for privacy. Send Interest to request contact.</i></span>'}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="print-section">
+                    <h3 style="background: #f0f0f0; padding: 8px 12px; margin-bottom: 12px; font-size: 16px; border-left: 4px solid var(--maroon); color: #333;">5. About & Expectations</h3>
+                    <div style="font-size: 14px; color: #000; border: 1px solid #ddd; padding: 12px;">
+                        <p style="margin-bottom: 8px;"><strong>About Me:</strong><br>${p.aboutMe || 'Not provided'}</p>
+                        <p><strong>Partner Expectations:</strong><br>${p.goals || 'Not provided'}</p>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                    <button class="primary-btn" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="this.innerHTML='Interest Sent ✓'; this.style.background='var(--teal)'; this.style.color='#fff';">Send Interest</button>
-                    <button class="secondary-btn" id="saveProfileBtn-${p.id}" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="toggleShortlist('${p.id}', this)">Save Profile</button>
-                    <button class="text-btn" style="width: 100%; margin-top: 8px; font-size: 14px; text-decoration: underline; color: var(--maroon);" onclick="toggleFullDetails('${p.id}', this)">View Full Details</button>
+                <div class="no-print" style="margin-top: 16px;">
+                    <button class="primary-btn" style="padding: 10px 16px; font-size: 14px;" onclick="window.print()">🖨️ Print as PDF</button>
                 </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div id="actionButtons-${p.id}" style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                ${!isOwner ? `<button class="primary-btn" style="flex: 1; padding: 16px; font-size: 1.05rem; background: var(--teal);" onclick="this.innerHTML='Interest Sent ✓';">❤️ Send Interest</button>` : ''}
+                <button class="secondary-btn" id="saveProfileBtn-${p.id}" style="flex: 1; padding: 16px; font-size: 1.05rem;" onclick="toggleShortlist('${p.id}', this)">★ Save Profile</button>
+                <button class="text-btn" id="toggleDetailsBtn-${p.id}" style="width: 100%; margin-top: 8px; font-size: 14px; text-decoration: underline; color: var(--maroon);" onclick="toggleFullDetails('${p.id}')">View Full Details</button>
             </div>
         </div>
     `;
     
     const savedProfiles = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]');
     const saveBtn = document.getElementById(`saveProfileBtn-${p.id}`);
-    if (savedProfiles.includes(String(p.id))) {
-        saveBtn.innerHTML = 'Saved ★';
+    if (saveBtn && savedProfiles.includes(String(p.id))) {
+        saveBtn.innerHTML = '★ Saved';
         saveBtn.style.borderColor = 'var(--gold)';
         saveBtn.style.color = 'var(--gold)';
     }
@@ -829,9 +949,10 @@ window.openProfileModal = function(id) {
     document.getElementById('profileModal').classList.remove('hidden');
 };
 
-window.toggleFullDetails = function(id, btnElement) {
+window.toggleFullDetails = function(id) {
     const quickInfo = document.getElementById(`quickInfo-${id}`);
     const fullDetails = document.getElementById(`fullDetails-${id}`);
+    const btnElement = document.getElementById(`toggleDetailsBtn-${id}`);
     
     if (fullDetails.style.display === 'none') {
         quickInfo.style.display = 'none';
@@ -909,9 +1030,18 @@ async function syncDashboard() {
             
             document.getElementById('dashCompletion').textContent = `${completionPercent}%`;
             document.getElementById('dashBar').style.width = `${completionPercent}%`;
+            
+            let actionHtml = `<button class="secondary-btn" type="button" data-page="registerPage" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page'));">Edit Profile</button>
+                              <button class="primary-btn" type="button" onclick="openProfileModal('${savedId}')">View My Profile</button>`;
+            
             if (completionPercent < 100) {
-                 document.querySelector('.dashboard-actions').innerHTML = `<button class="primary-btn" type="button" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page')); populateFormFromDraft('${savedId}');">Complete Profile</button>`;
+                 actionHtml = `<button class="primary-btn" type="button" onclick="document.getElementById('registerPage').classList.add('active-page'); document.querySelectorAll('.page').forEach(p => p !== document.getElementById('registerPage') && p.classList.remove('active-page')); populateFormFromDraft('${savedId}');">Complete Profile</button>
+                               <button class="secondary-btn" type="button" onclick="openProfileModal('${savedId}')">View Partial Profile</button>`;
             }
+            document.querySelector('.dashboard-actions').innerHTML = actionHtml;
+            
+            window.loadedProfiles = window.loadedProfiles || {};
+            window.loadedProfiles[savedId] = data;
         } else {
             document.getElementById('dashName').textContent = "Profile Not Found";
         }
@@ -990,6 +1120,7 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 ========================================= */
 function updateSectionProgress() {
     const formSectionsForProgress = document.querySelectorAll('.form-section');
+    let missingLabels = [];
     
     formSectionsForProgress.forEach(sec => {
         if (sec.id === 'sec-review') return; // Skip the review tab itself
@@ -1021,6 +1152,7 @@ function updateSectionProgress() {
                 navItem.classList.add('completed');
             } else {
                 navItem.classList.remove('completed');
+                missingLabels.push(navItem.textContent.replace(/[📷👤🎓🏠👨‍👩‍👧💭❤️📞📄✅✎]/g, '').trim());
             }
         }
     });
@@ -1032,8 +1164,18 @@ function updateSectionProgress() {
     
     const formCompletionPercent = document.getElementById('formCompletionPercent');
     const formProgressBar = document.getElementById('formProgressBar');
+    const formMissingText = document.getElementById('formMissingText');
+    
     if (formCompletionPercent) formCompletionPercent.textContent = percent + '%';
     if (formProgressBar) formProgressBar.style.width = percent + '%';
+    
+    if (formMissingText) {
+        if (missingLabels.length > 0) {
+            formMissingText.innerHTML = `Missing: <span style="color:var(--maroon);">${missingLabels.slice(0, 2).join(', ')}${missingLabels.length > 2 ? '...' : ''}</span>`;
+        } else {
+            formMissingText.innerHTML = `<span style="color:var(--teal);">All sections complete ✨</span>`;
+        }
+    }
 }
 
 // Trigger the progress check every time the user types, selects an option, or uploads a file
@@ -1042,6 +1184,97 @@ if (profileFormElement) {
     profileFormElement.addEventListener('input', updateSectionProgress);
     profileFormElement.addEventListener('change', updateSectionProgress);
 }
+
+/* =========================================
+   ADMIN DASHBOARD LOGIC
+========================================= */
+async function syncAdminDashboard() {
+    try {
+        const res = await apiFetch(`/api/profiles?page=1&limit=1000`);
+        if (res.ok) {
+            let data = await res.json();
+            let profiles = data.profiles || data;
+            
+            const tbody = document.getElementById('adminTableBody');
+            if(!tbody) return;
+            
+            let html = '';
+            let approved = 0, pending = 0, draft = 0;
+            
+            window.loadedProfiles = window.loadedProfiles || {};
+            
+            profiles.forEach(p => {
+                window.loadedProfiles[p.id] = p;
+                if(p.status === 'Approved') approved++;
+                if(p.status === 'Submitted') pending++;
+                if(p.status === 'Draft') draft++;
+                
+                const visualId = "MAT-" + String(p.id).padStart(4, "0");
+                const role = localStorage.getItem("userRole");
+                
+                let actions = `<button class="text-btn" onclick="openProfileModal('${p.id}')">View</button>`;
+                
+                // Only super admin or committee admin can approve/reject, unless member is given access
+                if (role === 'super_admin' || role === 'committee_admin') {
+                    if (p.status === 'Submitted' || p.status === 'Needs Correction') {
+                        actions += ` | <button class="text-btn" style="color:var(--teal);" onclick="changeProfileStatus('${p.id}', 'Approved')">Approve</button>
+                                     | <button class="text-btn" style="color:var(--maroon);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Reject/Correct</button>`;
+                    } else if (p.status === 'Approved') {
+                        actions += ` | <button class="text-btn" style="color:var(--maroon);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Revoke</button>`;
+                    }
+                }
+                
+                let badgeClass = 'status-badge ';
+                if(p.status === 'Draft') badgeClass += 'pending';
+                else if(p.status === 'Approved') badgeClass += 'approved';
+                else if(p.status === 'Needs Correction') badgeClass += 'correction';
+                else badgeClass += 'pending'; // yellow
+                
+                html += `
+                    <tr>
+                        <td>${visualId}</td>
+                        <td>${p.name || 'N/A'}</td>
+                        <td>${p.age || '-'}</td>
+                        <td>${p.city || '-'}</td>
+                        <td><span class="${badgeClass}">${p.status || 'Draft'}</span></td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            
+            document.getElementById('adminTotal').textContent = profiles.length;
+            document.getElementById('adminPending').textContent = pending;
+            document.getElementById('adminApproved').textContent = approved;
+            document.getElementById('adminShortlisted').textContent = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]').length; // Mock stat for now
+        }
+    } catch (e) {
+        console.error("Admin sync failed", e);
+    }
+}
+
+document.getElementById('refreshAdmin')?.addEventListener('click', syncAdminDashboard);
+
+window.changeProfileStatus = async function(id, newStatus) {
+    if (!confirm(`Are you sure you want to change profile MAT-${String(id).padStart(4,'0')} to ${newStatus}?`)) return;
+    
+    try {
+        const res = await apiFetch(`/api/profiles/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) {
+            showToast(`Profile updated to ${newStatus}`);
+            syncAdminDashboard(); // refresh table
+        } else {
+            const data = await res.json();
+            alert("Error: " + data.error);
+        }
+    } catch (e) {
+        alert("Failed to update profile.");
+    }
+};
 
 /* =========================================
    AUTO-FILL STATE BASED ON CITY

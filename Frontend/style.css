@@ -1088,6 +1088,16 @@ textarea {
     color: var(--maroon-dark);
 }
 
+.status-badge.approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.correction {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 .mini-profile-grid {
     display: grid;
     gap: 12px;
@@ -1314,6 +1324,51 @@ button, .nav-link {
 
 @keyframes ripple-anim {
     to { transform: scale(4); opacity: 0; }
+}
+
+/* =========================================
+   PRINT STYLES FOR PROFILE
+========================================= */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .modal:not(.hidden) {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        padding: 0;
+        background: white;
+    }
+    .modal-card {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        transform: none !important;
+    }
+    .print-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .print-container, .print-container * {
+        visibility: visible;
+    }
+    .no-print, .modal-close {
+        display: none !important;
+    }
+    .print-section {
+        page-break-inside: avoid;
+    }
+    .print-only-header {
+        display: flex !important;
+    }
 }
 
 @media (max-width: 980px) {
