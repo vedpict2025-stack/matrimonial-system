@@ -24,7 +24,7 @@ document.addEventListener('mousedown', function (e) {
 /* =========================================
    API HELPER & CONFIG
 ========================================= */
-const API_BASE = "http://localhost:5000"; // Local testing backend URL
+const API_BASE = "https://matrimonial-api-0097.onrender.com"; // Production backend URL
 
 async function apiFetch(endpoint, options = {}) {
     const savedId = localStorage.getItem("registeredProfileId") || "";
