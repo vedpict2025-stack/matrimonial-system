@@ -648,18 +648,19 @@
                 <div class="admin-stat"><span>Total Profiles</span><strong id="adminTotal">0</strong></div>
                 <div class="admin-stat"><span>Pending Approval</span><strong id="adminPending">0</strong></div>
                 <div class="admin-stat"><span>Approved</span><strong id="adminApproved">0</strong></div>
-                <div class="admin-stat"><span>Shortlisted</span><strong id="adminShortlisted">0</strong></div>
+                <div class="admin-stat"><span>Needs Correction</span><strong id="adminCorrection">0</strong></div>
             </div>
             <section class="dashboard-card">
                 <div class="card-title-row">
                     <div><span class="eyebrow">Profile Management</span><h2>Submitted Profiles</h2></div>
                     <input class="admin-search" id="adminSearch" placeholder="Search Profile ID / name">
                 </div>
-                <div class="admin-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                    <button type="button" class="admin-tab active" data-tab-status="Submitted" style="background: none; border: none; font-weight: 600; color: var(--pink); cursor: pointer; padding: 5px 10px; border-radius: 6px;">Pending Approval</button>
-                    <button type="button" class="admin-tab" data-tab-status="Approved" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px;">Approved</button>
-                    <button type="button" class="admin-tab" data-tab-status="Needs Correction" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px;">Needs Correction</button>
-                    <button type="button" class="admin-tab" data-tab-status="Draft" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px;">Drafts</button>
+                <div class="admin-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto;">
+                    <button type="button" class="admin-tab active" data-tab-status="Submitted" style="background: none; border: none; font-weight: 600; color: var(--pink); cursor: pointer; padding: 5px 10px; border-radius: 6px; white-space: nowrap;">Pending Approval</button>
+                    <button type="button" class="admin-tab" data-tab-status="Approved" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px; white-space: nowrap;">Approved</button>
+                    <button type="button" class="admin-tab" data-tab-status="Needs Correction" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px; white-space: nowrap;">Needs Correction</button>
+                    <button type="button" class="admin-tab" data-tab-status="Rejected" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px; white-space: nowrap;">Rejected</button>
+                    <button type="button" class="admin-tab" data-tab-status="Draft" style="background: none; border: none; font-weight: 600; color: var(--text); cursor: pointer; padding: 5px 10px; border-radius: 6px; white-space: nowrap;">Drafts</button>
                 </div>
                 <div class="table-wrap">
                     <table>

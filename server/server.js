@@ -66,7 +66,7 @@ app.get('/api/ping', (req, res) => res.status(200).send('pong'));
 app.post('/api/profiles', async (req, res) => {
     try {
         const profileData = { ...req.body };
-        if (!profileData.status) profileData.status = 'Draft';
+        if (!profileData.status) profileData.status = 'Submitted';
         
         const { data, error } = await supabase.from('profiles').insert([profileData]).select();
         if (error) throw error;

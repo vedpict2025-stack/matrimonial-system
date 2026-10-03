@@ -371,7 +371,7 @@ if (removePhotoBtn) {
    SECURE FORM SUBMISSION & SAVE PROGRESS
 ========================================= */
 
-function collectProfileData(status = 'Draft') {
+function collectProfileData(status = 'Submitted') {
     return {
         name: document.getElementById("name").value,
         dob: document.getElementById("dob").value,
@@ -396,7 +396,7 @@ function collectProfileData(status = 'Draft') {
 }
 
 async function saveDraftToDatabase(showAlert = false) {
-    const profile = collectProfileData('Draft');
+    const profile = collectProfileData('Submitted');
     if (!profile.name || !profile.pin) {
         if (showAlert) alert("Please enter at least your Name and PIN to save progress.");
         return;
@@ -1212,7 +1212,7 @@ async function syncAdminDashboard() {
             if (!tbody) return;
 
             let html = '';
-            let approved = 0, pending = 0, draft = 0;
+            let approved = 0, pending = 0, draft = 0, correction = 0, rejected = 0;
             
             const activeTab = document.querySelector('.admin-tab.active');
             const activeStatus = activeTab ? activeTab.getAttribute('data-tab-status') : 'Submitted';
@@ -1224,9 +1224,10 @@ async function syncAdminDashboard() {
                 if (p.status === 'Approved') approved++;
                 if (p.status === 'Submitted') pending++;
                 if (p.status === 'Draft') draft++;
+                if (p.status === 'Needs Correction') correction++;
+                if (p.status === 'Rejected') rejected++;
 
                 // Only render if it matches the active tab status
-                if (p.status !== activeStatus && (activeStatus === 'Submitted' && p.status !== 'Submitted')) return;
                 if (p.status !== activeStatus) return;
 
                 const visualId = "MAT-" + String(p.id).padStart(4, "0");
@@ -1238,9 +1239,10 @@ async function syncAdminDashboard() {
                 if (role === 'super_admin' || role === 'committee_admin') {
                     if (p.status === 'Submitted' || p.status === 'Needs Correction') {
                         actions += ` | <button class="text-btn" style="color:var(--teal);" onclick="changeProfileStatus('${p.id}', 'Approved')">Approve</button>
-                                     | <button class="text-btn" style="color:var(--maroon);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Reject/Correct</button>`;
+                                     | <button class="text-btn" style="color:var(--maroon);" onclick="changeProfileStatus('${p.id}', 'Rejected')">Reject</button>
+                                     | <button class="text-btn" style="color:var(--orange);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Need Correction</button>`;
                     } else if (p.status === 'Approved') {
-                        actions += ` | <button class="text-btn" style="color:var(--maroon);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Revoke</button>`;
+                        actions += ` | <button class="text-btn" style="color:var(--orange);" onclick="changeProfileStatus('${p.id}', 'Needs Correction')">Revoke Approval</button>`;
                     }
                 }
 
@@ -1248,6 +1250,7 @@ async function syncAdminDashboard() {
                 if (p.status === 'Draft') badgeClass += 'pending';
                 else if (p.status === 'Approved') badgeClass += 'approved';
                 else if (p.status === 'Needs Correction') badgeClass += 'correction';
+                else if (p.status === 'Rejected') badgeClass += 'correction';
                 else badgeClass += 'pending'; // yellow
 
                 html += `
@@ -1267,6 +1270,8 @@ async function syncAdminDashboard() {
             document.getElementById('adminTotal').textContent = profiles.length;
             document.getElementById('adminPending').textContent = pending;
             document.getElementById('adminApproved').textContent = approved;
+            const adminCorrectionEl = document.getElementById('adminCorrection');
+            if (adminCorrectionEl) adminCorrectionEl.textContent = correction;
             document.getElementById('adminShortlisted').textContent = JSON.parse(localStorage.getItem('shortlistedProfiles') || '[]').length; // Mock stat for now
         }
     } catch (e) {
