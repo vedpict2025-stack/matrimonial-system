@@ -25,26 +25,42 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 console.log("✅ Supabase client initialized!");
 
 // --- MIDDLEWARE FOR AUTH ---
+const roleCache = new Map();
 const getRole = async (userId) => {
     if (!userId) return null;
+    if (roleCache.has(userId)) return roleCache.get(userId);
+    
+    let role = null;
     if (userId.startsWith('COM-')) {
         const { data } = await supabase.from('committee').select('role').eq('id', userId).single();
-        return data ? data.role : null;
+        role = data ? data.role : null;
     } else {
         const dbId = parseInt(userId.replace(/\D/g, ''), 10);
         if (isNaN(dbId)) return null;
         const { data } = await supabase.from('profiles').select('id').eq('id', dbId).single();
-        return data ? 'user' : null;
+        role = data ? 'user' : null;
     }
+    
+    if (role) {
+        roleCache.set(userId, role);
+        setTimeout(() => roleCache.delete(userId), 5 * 60 * 1000); // 5 min cache
+    }
+    return role;
 };
 
 const authMiddleware = async (req, res, next) => {
+    if (req.path === '/api/login' || req.path === '/api/ping') return next(); // Skip for login/ping
+    
     const userId = req.headers['x-user-id'];
     req.userRole = await getRole(userId);
     req.userId = userId;
     next();
 };
 app.use(authMiddleware);
+
+// --- 0. WAKE UP PING ---
+app.get('/api/ping', (req, res) => res.status(200).send('pong'));
+
 
 // --- 1. CREATE PROFILE (Registration / Save Progress) ---
 app.post('/api/profiles', async (req, res) => {
@@ -86,7 +102,7 @@ app.get('/api/profiles', async (req, res) => {
         const start = (page - 1) * limit;
         const end = start + limit - 1;
 
-        let query = supabase.from('profiles').select('*', { count: 'exact' });
+        let query = supabase.from('profiles').select('*');
         
         // Access control
         if (req.userRole === 'user' || !req.userRole) {
@@ -95,12 +111,12 @@ app.get('/api/profiles', async (req, res) => {
             query = query.eq('status', req.query.status);
         }
 
-        const { data, error, count } = await query
+        const { data, error } = await query
             .order('created_at', { ascending: false })
             .range(start, end);
 
         if (error) throw error;
-        res.status(200).json({ profiles: data, total: count });
+        res.status(200).json({ profiles: data });
     } catch (err) {
         res.status(500).json({ error: "Could not fetch profiles." });
     }

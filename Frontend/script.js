@@ -26,6 +26,9 @@ document.addEventListener('mousedown', function (e) {
 ========================================= */
 const API_BASE = "https://matrimonial-api-0097.onrender.com"; // Production backend URL
 
+// Wake up the free-tier backend on load to mitigate cold start
+fetch(`${API_BASE}/api/ping`).catch(() => {});
+
 async function apiFetch(endpoint, options = {}) {
     const savedId = localStorage.getItem("registeredProfileId") || "";
     const headers = {
