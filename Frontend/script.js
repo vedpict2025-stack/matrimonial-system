@@ -1178,11 +1178,21 @@ function updateSectionProgress() {
     }
 }
 
+// Debounce utility function to improve performance on high-frequency events
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 // Trigger the progress check every time the user types, selects an option, or uploads a file
 const profileFormElement = document.getElementById('profileForm');
 if (profileFormElement) {
-    profileFormElement.addEventListener('input', updateSectionProgress);
-    profileFormElement.addEventListener('change', updateSectionProgress);
+    const debouncedUpdateProgress = debounce(updateSectionProgress, 300);
+    profileFormElement.addEventListener('input', debouncedUpdateProgress);
+    profileFormElement.addEventListener('change', debouncedUpdateProgress);
 }
 
 /* =========================================
